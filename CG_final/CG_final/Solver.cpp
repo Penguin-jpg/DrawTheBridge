@@ -78,7 +78,7 @@ void Solver::applyConstraint()
 
 void Solver::checkCollisions(float dt)
 {
-	// strength of response when colliding
+	// strength of bouncing response when colliding
 	const float responseStrength = 0.75f;
 
 	// naive O(n^2) method
