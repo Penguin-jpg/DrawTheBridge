@@ -31,10 +31,11 @@ int main()
 	sf::Clock timer;
 
 	Solver solver;
-	Renderer renderer(window);
+	Renderer renderer(window, solver);
 	RNG rng;
 
 	solver.setConstraint({ WINDOW_WIDTH * 0.5f, WINDOW_HEIGHT * 0.5f }, 450.0f);
+	solver.setWorldSize({ WINDOW_WIDTH - 100.0f, WINDOW_HEIGHT - 100.0f }, 100.0f);
 	solver.setFrameDt(FRAMERATE);
 	solver.setSubSteps(NUM_SUB_STEPS);
 
@@ -56,8 +57,8 @@ int main()
 		}
 
 		solver.update();
-		window.clear(sf::Color::White);
-		renderer.render(solver);
+		window.clear(sf::Color::Black);
+		renderer.render();
 		window.display();
 	}
 

@@ -45,4 +45,9 @@
       <Filter>標頭檔</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\circle.png">
+      <Filter>資源檔</Filter>
+    </Image>
+  </ItemGroup>
 </Project>

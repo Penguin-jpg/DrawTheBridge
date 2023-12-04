@@ -9,8 +9,8 @@ void Solver::update()
 	for (int i = 0; i < subSteps; i++)
 	{
 		applyGravity();
-		checkCollisions(stepDt);
-		applyConstraint();
+		solveObjectCollisions(stepDt);
+		//applyConstraint();
 		updateObjects(stepDt);
 	}
 }
@@ -28,6 +28,7 @@ void Solver::updateObjects(float dt)
 	for (Object& object : objects)
 	{
 		object.update(dt);
+		solveCollisionWithWorld(object);
 	}
 }
 
@@ -64,7 +65,7 @@ void Solver::applyConstraint()
 	{
 		// direction from current position of object to center of constraint
 		sf::Vector2f direction = constraintCenter - object.currentPosition;
-		float distance = Math::getDistance(object.currentPosition, constraintCenter);
+		float distance = Math::getLength(direction);
 		// if object is outside of contraint, put it back along the unit direction vector
 		if (distance > (constraintRadius - object.radius))
 		{
@@ -76,7 +77,39 @@ void Solver::applyConstraint()
 	}
 }
 
-void Solver::checkCollisions(float dt)
+void Solver::setWorldSize(sf::Vector2f size, float _margin)
+{
+	worldSize = size;
+	margin = _margin;
+}
+
+const sf::Vector3f Solver::getWorld()
+{
+	return { worldSize.x, worldSize.y, margin };
+}
+
+void Solver::solveCollisionWithWorld(Object& object)
+{
+	// if object out of world, put it back
+	if (object.currentPosition.x > worldSize.x - margin)
+	{
+		object.currentPosition.x = worldSize.x - margin;
+	}
+	else if (object.currentPosition.x < margin)
+	{
+		object.currentPosition.x = margin;
+	}
+	if (object.currentPosition.y > worldSize.y - margin)
+	{
+		object.currentPosition.y = worldSize.y - margin;
+	}
+	else if (object.currentPosition.y < margin)
+	{
+		object.currentPosition.y = margin;
+	}
+}
+
+void Solver::solveObjectCollisions(float dt)
 {
 	// strength of bouncing response when colliding
 	const float responseStrength = 0.75f;
@@ -91,7 +124,7 @@ void Solver::checkCollisions(float dt)
 			Object& object2 = objects[j];
 
 			sf::Vector2f direction = object1.currentPosition - object2.currentPosition;
-			float distance = Math::getDistance(object1.currentPosition, object2.currentPosition);
+			float distance = Math::getLength(direction);
 			// the min distance to not collide is the sum of radius
 			const float minDistance = object1.radius + object2.radius;
 

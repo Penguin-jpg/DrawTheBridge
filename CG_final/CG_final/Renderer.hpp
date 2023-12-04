@@ -5,9 +5,18 @@
 class Renderer
 {
 public:
-	Renderer(sf::RenderTarget& target) : target(target) {}
+	Renderer(sf::RenderTarget& target, Solver& solver);
 
-	void render(Solver& solver);
+	void initWorldBox();
+
+	void render();
 private:
+	// target for rendering
 	sf::RenderTarget& target;
+	// physics solver
+	Solver& solver;
+	// vertex array of world box (draw with triangle strip)
+	sf::VertexArray worldBox;
+	// texture
+	sf::Texture texture;
 };

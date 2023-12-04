@@ -155,6 +155,9 @@
     <ClInclude Include="Renderer.hpp" />
     <ClInclude Include="Solver.hpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\circle.png" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

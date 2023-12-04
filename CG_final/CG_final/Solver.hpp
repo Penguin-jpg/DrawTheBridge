@@ -22,7 +22,11 @@ public:
 	const sf::Vector3f getConstraint();
 	void applyConstraint();
 
-	void checkCollisions(float dt);
+	void setWorldSize(sf::Vector2f size, float margin);
+	const sf::Vector3f getWorld();
+	void solveCollisionWithWorld(Object& object);
+
+	void solveObjectCollisions(float dt);
 
 	const float getElapsedTime();
 	void setFrameDt(const int framerate);
@@ -36,6 +40,9 @@ private:
 	// constraint to hold objecst inside
 	sf::Vector2f constraintCenter;
 	float constraintRadius = 100.0f;
+	// world box
+	sf::Vector2f worldSize;
+	float margin = 1.0f;
 	// timer
 	float elapsedTime = 0.0f;
 	float frameDt = 0.0f;
