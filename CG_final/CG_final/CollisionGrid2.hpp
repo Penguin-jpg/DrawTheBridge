@@ -1,6 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include "Object.hpp"
+#include "Particle.hpp"
 #include <vector>
 #include <iostream>
 
@@ -10,9 +10,9 @@ constexpr float CELL_SIZE = 30.0f;
 struct CollisionCell
 {
 	int numObjects = 0;
-	Object* objects[CELL_CAPACITY] = {};
+	Particle* objects[CELL_CAPACITY] = {};
 
-	void addObject(Object& object)
+	void addObject(Particle& object)
 	{
 		objects[numObjects] = &object;
 		numObjects = numObjects + 1 >= CELL_CAPACITY ? numObjects : numObjects + 1;
@@ -52,7 +52,7 @@ struct CollisionGrid
 		return cells[pos];
 	}
 
-	void addObject(Object& object)
+	void addObject(Particle& object)
 	{
 		const sf::Vector2f position = object.currentPosition;
 		int row = position.y / CELL_SIZE;

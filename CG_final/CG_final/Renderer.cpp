@@ -7,7 +7,7 @@ Renderer::Renderer(Solver& solver) : solver(solver), worldBox(sf::Quads, 4)
 	// load texture
 	texture.loadFromFile("assets/circle.png");
 	texture.generateMipmap();
-	texture.setSmooth(true);
+	//texture.setSmooth(true);
 }
 
 void Renderer::initWorldBox()
@@ -36,53 +36,51 @@ void Renderer::render(RenderContext& context)
 
 	// render state to store transform and texture
 	sf::RenderStates states;
-	//states.texture = &texture;
+	const sf::Vector2i textureSize = (sf::Vector2i)texture.getSize();
 
 	// draw world box
 	context.draw(worldBox, states);
 
 	// draw a cirlce to represent an object
 	sf::CircleShape circle(1.0f);
-	circle.setPointCount(32);
+	//circle.setPointCount(32);
 	circle.setOrigin(1.0f, 1.0f);
-	const std::vector<Object>& objects = solver.getObjects();
-	for (const Object& object : objects)
+	circle.setTextureRect({ 0, 0, textureSize.x, textureSize.y });
+	circle.setTexture(&texture);
+	const std::vector<Particle>& particles = solver.getParticles();
+	for (const Particle& particle : particles)
 	{
-		circle.setPosition(object.currentPosition);
-		circle.setScale(object.radius, object.radius);
-		circle.setFillColor(sf::Color::Green);
-		context.draw(circle);
+		circle.setPosition(particle.currentPosition);
+		circle.setScale(particle.radius, particle.radius);
+		//circle.setFillColor(sf::Color::Green);
+		context.draw(circle, states);
 	}
+
+	// vertex array of links (draw with line)
+	const std::vector<Link>& links = solver.getLinks();
+	// width of line
+	const float width = 2.0f;
+	//sf::VertexArray linkVertices(sf::Lines, 2 * links.size());
+	sf::VertexArray linkVertices(sf::Quads);
+	for (int i = 0; i < links.size(); i++)
+	{
+		const Link& link = links[i];
+		/*linkVertices[2 * i] = sf::Vertex(link.p1->currentPosition, sf::Color::Red, {});
+		linkVertices[2 * i + 1] = sf::Vertex(link.p2->currentPosition, sf::Color::Red, {});*/
+		drawThickLine(linkVertices, link.p1->currentPosition, link.p2->currentPosition, width, sf::Color::Red);
+	}
+	context.draw(linkVertices, states);
 }
 
-//void Renderer::render()
-//{
-//	// draw constraint
-//	/*const sf::Vector3f constraintInfo = solver.getConstraint();
-//	sf::CircleShape constraint(constraintInfo.z);
-//	constraint.setOrigin({ constraintInfo.z,constraintInfo.z });
-//	constraint.setFillColor(sf::Color::Black);
-//	constraint.setPosition({ constraintInfo.x, constraintInfo.y });
-//	constraint.setPointCount(128);
-//	target.draw(constraint);*/
-//
-//	// render state to store transform and texture
-//	sf::RenderStates states;
-//	//states.texture = &texture;
-//
-//	// draw world box
-//	target.draw(worldBox, states);
-//
-//	// draw a cirlce to represent an object
-//	sf::CircleShape circle(1.0f);
-//	circle.setPointCount(32);
-//	circle.setOrigin(1.0f, 1.0f);
-//	const std::vector<Object>& objects = solver.getObjects();
-//	for (const Object& object : objects)
-//	{
-//		circle.setPosition(object.currentPosition);
-//		circle.setScale(object.radius, object.radius);
-//		circle.setFillColor(sf::Color::Green);
-//		target.draw(circle);
-//	}
-//}
+// because SFML doesn't have line with width, draw a rectangle instead
+void Renderer::drawThickLine(sf::VertexArray& va, const sf::Vector2f& start, const sf::Vector2f& end, float width, sf::Color color)
+{
+	sf::Vector2f direction = end - start;
+	sf::Vector2f unit = direction / Math::getLength(direction);
+
+	// extend the point along direction
+	va.append(sf::Vertex({ start.x - width * unit.y, start.y + width * unit.x }, color));
+	va.append(sf::Vertex({ start.x + width * unit.y, start.y - width * unit.x }, color));
+	va.append(sf::Vertex({ end.x + width * unit.y, end.y - width * unit.x }, color));
+	va.append(sf::Vertex({ end.x - width * unit.y, end.y + width * unit.x }, color));
+}

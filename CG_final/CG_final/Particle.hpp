@@ -4,7 +4,8 @@
 
 static int objectCounter = 0;
 
-struct Object
+// basic object
+struct Particle
 {
 	// use an id to identify an object
 	int id = 0;
@@ -13,9 +14,9 @@ struct Object
 	float radius = 1.0f;
 	RigidBody rb;
 
-	Object() = default;
+	Particle() = default;
 
-	Object(sf::Vector2f position, float radius)
+	Particle(sf::Vector2f position, float radius)
 		:currentPosition(position), prevPosition(position), radius(radius)
 	{
 		id = objectCounter;

@@ -11,48 +11,85 @@ void Solver::update()
 
 	for (int i = 0; i < subSteps; i++)
 	{
-		applyGravity();
+		//applyGravity();
 		//fillCollisionGrid();
 		//solveGridCollision();
-		solveObjectCollisions();
+		solveCollisions();
 		//applyConstraint();
-		updateObjects(stepDt);
+		updateParticles(stepDt);
+		updateLinks(stepDt);
 	}
 }
 
 void Solver::applyGravity()
 {
-	for (Object& object : objects)
+	for (Particle& particle : particles)
 	{
-		object.rb.applyForce(gravity);
+		particle.rb.applyForce(gravity);
 	}
 }
 
-void Solver::updateObjects(float dt)
+void Solver::updateParticles(float dt)
 {
-	for (Object& object : objects)
+	for (Particle& particle : particles)
 	{
-		object.update(dt);
-		solveCollisionWithWorld(object);
+		particle.update(dt);
+		solveCollisionWithWorld(particle);
 	}
 }
 
-Object& Solver::addObject(sf::Vector2f position, float radius)
+void Solver::updateLinks(float dt)
 {
-	// in c++17, emplace_back return a reference of the appended object
-	Object& object = objects.emplace_back(position, radius);
-	grid.addObject(object);
-	return object;
+	for (Link& link : links)
+	{
+		link.update(dt);
+	}
 }
 
-const std::vector<Object>& Solver::getObjects()
+void Solver::applyForce(float radius, sf::Vector2f position)
 {
-	return objects;
+	for (Particle& particle : particles)
+	{
+		sf::Vector2f direction = particle.currentPosition - position;
+		float distance = Math::getLength(direction);
+		std::cout << distance << std::endl;
+		if (distance < radius)
+		{
+			particle.rb.applyForce(1.f * (radius - distance) * direction);
+		}
+	}
 }
 
-const int Solver::getNumObjects()
+Particle& Solver::addParticle(sf::Vector2f position, float radius)
 {
-	return objects.size();
+	// in c++17, insertion return a reference of the appended particle
+	// note that another insertion will invalidate the reference
+	return particles.emplace_back(position, radius);
+}
+
+std::vector<Particle>& Solver::getParticles()
+{
+	return particles;
+}
+
+const int Solver::getNumParticles()
+{
+	return particles.size();
+}
+
+Link& Solver::addLink(Particle* p1, Particle* p2)
+{
+	return links.emplace_back(p1, p2, Math::getLength(p1->currentPosition - p2->currentPosition));
+}
+
+const std::vector<Link>& Solver::getLinks()
+{
+	return links;
+}
+
+const int Solver::getNumLinks()
+{
+	return links.size();
 }
 
 void Solver::setConstraint(sf::Vector2f center, float radius)
@@ -68,18 +105,18 @@ const sf::Vector3f Solver::getConstraint()
 
 void Solver::applyConstraint()
 {
-	for (Object& object : objects)
+	for (Particle& particle : particles)
 	{
-		// direction from current position of object to center of constraint
-		sf::Vector2f direction = constraintCenter - object.currentPosition;
+		// direction from current position of particle to center of constraint
+		sf::Vector2f direction = constraintCenter - particle.currentPosition;
 		float distance = Math::getLength(direction);
-		// if object is outside of contraint, put it back along the unit direction vector
-		if (distance > (constraintRadius - object.radius))
+		// if particle is outside of contraint, put it back along the unit direction vector
+		if (distance > (constraintRadius - particle.radius))
 		{
 			std::cout << "!\n";
 			sf::Vector2f unit = direction / distance;
-			// constraintRadius - object.radius = how far the object out of the constraint
-			object.currentPosition = constraintCenter - unit * (constraintRadius - object.radius);
+			// constraintRadius - particle.radius = how far the particle out of the constraint
+			particle.currentPosition = constraintCenter - unit * (constraintRadius - particle.radius);
 		}
 	}
 }
@@ -89,61 +126,61 @@ const sf::Vector3f Solver::getWorld()
 	return { worldSize.x, worldSize.y, margin };
 }
 
-void Solver::solveCollisionWithWorld(Object& object)
+void Solver::solveCollisionWithWorld(Particle& particle)
 {
-	// if object out of world, put it back
-	if (object.currentPosition.x > worldSize.x - margin)
+	// if particle out of world, put it back
+	if (particle.currentPosition.x > worldSize.x - margin)
 	{
-		object.currentPosition.x = worldSize.x - margin;
+		particle.currentPosition.x = worldSize.x - margin;
 	}
-	else if (object.currentPosition.x < margin)
+	else if (particle.currentPosition.x < margin)
 	{
-		object.currentPosition.x = margin;
+		particle.currentPosition.x = margin;
 	}
-	if (object.currentPosition.y > worldSize.y - margin)
+	if (particle.currentPosition.y > worldSize.y - margin)
 	{
-		object.currentPosition.y = worldSize.y - margin;
+		particle.currentPosition.y = worldSize.y - margin;
 	}
-	else if (object.currentPosition.y < margin)
+	else if (particle.currentPosition.y < margin)
 	{
-		object.currentPosition.y = margin;
+		particle.currentPosition.y = margin;
 	}
 }
 
-void Solver::solveObjectCollisions()
+void Solver::solveCollisions()
 {
 	// strength of bouncing response when colliding
 	const float responseStrength = 0.75f;
 
 	// naive O(n^2) method
-	for (int i = 0; i < objects.size(); i++)
+	for (int i = 0; i < particles.size(); i++)
 	{
-		Object& object1 = objects[i];
+		Particle& p1 = particles[i];
 
-		for (int j = i + 1; j < objects.size(); j++)
+		for (int j = i + 1; j < particles.size(); j++)
 		{
-			Object& object2 = objects[j];
+			Particle& p2 = particles[j];
 
-			sf::Vector2f direction = object1.currentPosition - object2.currentPosition;
+			sf::Vector2f direction = p1.currentPosition - p2.currentPosition;
 			float distance = Math::getLength(direction);
 			// the min distance to not collide is the sum of radius
-			const float minDistance = object1.radius + object2.radius;
+			const float minDistance = p1.radius + p2.radius;
 
 			if (distance < minDistance)
 			{
 				sf::Vector2f unit = direction / distance;
 				// use radius as ratio of bouncing
-				float total = object1.radius + object2.radius;
-				float ratio1 = object1.radius / total;
-				float ratio2 = object2.radius / total;
+				float total = p1.radius + p2.radius;
+				float ratio1 = p1.radius / total;
+				float ratio2 = p2.radius / total;
 
-				// distance to push to separate two objects
-				// distance - minDistance = overlappinig distance between two objects
-				// times 0.5 because each objects only need to move away half of that distance
+				// distance to push to separate two particles
+				// distance - minDistance = overlappinig distance between two particles
+				// times 0.5 because each particles only need to move away half of that distance
 				float delta = responseStrength * 0.5f * (distance - minDistance);
 
-				object1.currentPosition -= unit * (ratio2 * delta);
-				object2.currentPosition += unit * (ratio1 * delta);
+				p1.currentPosition -= unit * (ratio2 * delta);
+				p2.currentPosition += unit * (ratio1 * delta);
 			}
 		}
 	}
@@ -154,9 +191,9 @@ void Solver::fillCollisionGrid()
 	// initialize the grid
 	grid.clearGrid();
 
-	for (Object& object : objects)
+	for (Particle& particle : particles)
 	{
-		grid.addObject(object);
+		grid.addObject(particle);
 	}
 }
 
@@ -185,43 +222,43 @@ void Solver::solveGridCollision()
 
 void Solver::solveCellCollision(CollisionCell& cell1, CollisionCell& cell2)
 {
-	for (Object* object1 : cell1.objects)
+	for (Particle* p1 : cell1.objects)
 	{
-		for (Object* object2 : cell2.objects)
+		for (Particle* p2 : cell2.objects)
 		{
-			if (object1 != nullptr && object2 != nullptr && object1->id != object2->id)
+			if (p1 != nullptr && p2 != nullptr && p1->id != p2->id)
 			{
-				solveObjectCollision(object1, object2);
+				solveParticleCollision(p1, p2);
 			}
 		}
 	}
 }
 
-void Solver::solveObjectCollision(Object* object1, Object* object2)
+void Solver::solveParticleCollision(Particle* p1, Particle* p2)
 {
 	// strength of bouncing response when colliding
 	constexpr float responseCoef = 0.75f;
 
-	sf::Vector2f direction = object1->currentPosition - object2->currentPosition;
+	sf::Vector2f direction = p1->currentPosition - p2->currentPosition;
 	float distance = Math::getLength(direction);
 	// the min distance to not collide is the sum of radius
-	const float minDistance = object1->radius + object2->radius;
+	const float minDistance = p1->radius + p2->radius;
 
 	if (distance < minDistance)
 	{
 		sf::Vector2f unit = direction / distance;
 		// use radius as ratio of bouncing
-		float total = object1->radius + object2->radius;
-		float ratio1 = object1->radius / total;
-		float ratio2 = object2->radius / total;
+		float total = p1->radius + p2->radius;
+		float ratio1 = p1->radius / total;
+		float ratio2 = p2->radius / total;
 
-		// distance to push to separate two objects
-		// distance - minDistance = overlappinig distance between two objects
-		// times 0.5 because each objects only need to move away half of that distance
+		// distance to push to separate two particles
+		// distance - minDistance = overlappinig distance between two particles
+		// times 0.5 because each particles only need to move away half of that distance
 		float delta = responseCoef * 0.5f * (distance - minDistance);
 
-		object1->currentPosition -= unit * (ratio2 * delta);
-		object2->currentPosition += unit * (ratio1 * delta);
+		p1->currentPosition -= unit * (ratio2 * delta);
+		p2->currentPosition += unit * (ratio1 * delta);
 	}
 }
 

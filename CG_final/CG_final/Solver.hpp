@@ -1,7 +1,8 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <vector>
-#include "Object.hpp"
+#include "Particle.hpp"
+#include "Link.hpp"
 #include "CollisionGrid2.hpp"
 
 // this class is in charge of simulation
@@ -12,24 +13,31 @@ public:
 
 	void update();
 	void applyGravity();
-	void updateObjects(float dt);
+	void updateParticles(float dt);
+	void updateLinks(float dt);
 
-	Object& addObject(sf::Vector2f position, float radius);
-	const std::vector<Object>& getObjects();
-	const int getNumObjects();
+	void applyForce(float radius, sf::Vector2f position);
+
+	Particle& addParticle(sf::Vector2f position, float radius);
+	std::vector<Particle>& getParticles();
+	const int getNumParticles();
+
+	Link& addLink(Particle* p1, Particle* p2);
+	const std::vector<Link>& getLinks();
+	const int getNumLinks();
 
 	void setConstraint(sf::Vector2f center, float radius);
 	const sf::Vector3f getConstraint();
 	void applyConstraint();
 
 	const sf::Vector3f getWorld();
-	void solveCollisionWithWorld(Object& object);
+	void solveCollisionWithWorld(Particle& particle);
 
-	void solveObjectCollisions();
+	void solveCollisions();
 	void fillCollisionGrid();
 	void solveGridCollision();
 	void solveCellCollision(CollisionCell& cell1, CollisionCell& cell2);
-	void solveObjectCollision(Object* object1, Object* object2);
+	void solveParticleCollision(Particle* p1, Particle* p2);
 
 	const float getElapsedTime();
 	void setFrameDt(const int framerate);
@@ -39,7 +47,8 @@ public:
 
 private:
 	sf::Vector2f gravity{ 0.0f, 1000.0f };
-	std::vector<Object> objects;
+	std::vector<Particle> particles;
+	std::vector<Link> links;
 	// constraint to hold objecst inside
 	sf::Vector2f constraintCenter;
 	float constraintRadius = 100.0f;

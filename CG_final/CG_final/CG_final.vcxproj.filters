@@ -24,13 +24,10 @@
     <ClCompile Include="Renderer.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
-    <ClCompile Include="TransformManager.cpp">
+    <ClCompile Include="StateManager.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
-      <Filter>來源檔案</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderContext.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
   </ItemGroup>
@@ -38,7 +35,7 @@
     <ClInclude Include="Solver.hpp">
       <Filter>標頭檔</Filter>
     </ClInclude>
-    <ClInclude Include="Object.hpp">
+    <ClInclude Include="Particle.hpp">
       <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="Renderer.hpp">
@@ -56,7 +53,7 @@
     <ClInclude Include="CollisionGrid.hpp">
       <Filter>標頭檔</Filter>
     </ClInclude>
-    <ClInclude Include="TransformManager.hpp">
+    <ClInclude Include="StateManager.hpp">
       <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="Game.hpp">
@@ -66,6 +63,9 @@
       <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="CollisionGrid2.hpp">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="Link.hpp">
       <Filter>標頭檔</Filter>
     </ClInclude>
   </ItemGroup>
