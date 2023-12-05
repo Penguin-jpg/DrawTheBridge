@@ -152,6 +152,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CollisionGrid.hpp" />
+    <ClInclude Include="CollisionGrid2.hpp" />
     <ClInclude Include="Game.hpp" />
     <ClInclude Include="Random.hpp" />
     <ClInclude Include="RenderContext.hpp" />

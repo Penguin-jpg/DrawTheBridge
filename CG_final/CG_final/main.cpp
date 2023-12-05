@@ -18,13 +18,14 @@ int main()
 	const int FRAMERATE = 60;
 	const int NUM_SUB_STEPS = 8;
 	const int MAX_NUM_OBJECTS = 100;
+	//const int MAX_NUM_OBJECTS = 10;
 	const float OBJECT_MIN_RADIUS = 10.0f;
-	const float OBJECT_MAX_RADIUS = 50.0f;
+	const float OBJECT_MAX_RADIUS = 20.0f;
 	const float OBJECT_SPAWN_DELAY = 0.025f;
 	const float OBJECT_SPPED = 1200.0f;
-	const sf::Vector2f SPAWN_LOCATION = { 500.0f, 200.0f };
-	const sf::Vector2f WORLD_SIZE = { 1000.0f, 1000.0f };
-	//const sf::Vector2f WORLD_SIZE = { 500.0f, 500.0f };
+	const sf::Vector2f SPAWN_LOCATION = { 100.0f, 100.0f };
+	//const sf::Vector2f WORLD_SIZE = { 1000.0f, 1000.0f };
+	const sf::Vector2f WORLD_SIZE = { 300.0f, 300.0f };
 
 	// control
 	bool dragging = false;
@@ -42,7 +43,7 @@ int main()
 	// timer for game
 	sf::Clock timer;
 
-	Solver solver(WORLD_SIZE, OBJECT_MAX_RADIUS, OBJECT_MAX_RADIUS);
+	Solver solver(WORLD_SIZE, OBJECT_MAX_RADIUS);
 	Renderer renderer(solver);
 	RNG rng;
 

@@ -25,11 +25,12 @@ struct CollisionGrid
 		numCols = ceil((float)size.x / cellSize);
 		std::cout << numRows << ", " << numCols << std::endl;
 		// resize to reserve space so we can use index to access
-		cells.resize(numRows);
+		/*cells.resize(numRows);
 		for (int i = 0; i < numRows; i++)
 		{
 			cells[i].resize(numCols);
-		}
+		}*/
+		clearGrid();
 	}
 
 	void addObject(const Object& object)

@@ -2,8 +2,8 @@
 #include "Math.hpp"
 #include <iostream>
 
-Solver::Solver(sf::Vector2f size, float margin, float cellSize)
-	:worldSize(size), margin(margin), grid(size, cellSize) {}
+Solver::Solver(sf::Vector2f size, float margin)
+	:worldSize(size), margin(margin), grid(size.x, size.y) {}
 
 void Solver::update()
 {
@@ -12,9 +12,9 @@ void Solver::update()
 	for (int i = 0; i < subSteps; i++)
 	{
 		applyGravity();
+		//fillCollisionGrid();
+		//solveGridCollision();
 		solveObjectCollisions();
-		//grid.clearGrid();
-		//grid.checkCellCollisions();
 		//applyConstraint();
 		updateObjects(stepDt);
 	}
@@ -146,6 +146,82 @@ void Solver::solveObjectCollisions()
 				object2.currentPosition += unit * (ratio1 * delta);
 			}
 		}
+	}
+}
+
+void Solver::fillCollisionGrid()
+{
+	// initialize the grid
+	grid.clearGrid();
+
+	for (Object& object : objects)
+	{
+		grid.addObject(object);
+	}
+}
+
+void Solver::solveGridCollision()
+{
+	// we will check every neighbor so start from 1 to prevent out of bound
+	for (int row = 1; row < grid.numRows - 1; row++)
+	{
+		for (int col = 1; col < grid.numCols - 1; col++)
+		{
+			// current cell
+			CollisionCell& currentCell = grid.getCell(row, col);
+
+			// check its neighbors
+			for (int i = -1; i <= 1; i++)
+			{
+				for (int j = -1; j <= 1; j++)
+				{
+					CollisionCell& neighborCell = grid.getCell(row + i, col + j);
+					solveCellCollision(currentCell, neighborCell);
+				}
+			}
+		}
+	}
+}
+
+void Solver::solveCellCollision(CollisionCell& cell1, CollisionCell& cell2)
+{
+	for (Object* object1 : cell1.objects)
+	{
+		for (Object* object2 : cell2.objects)
+		{
+			if (object1 != nullptr && object2 != nullptr && object1->id != object2->id)
+			{
+				solveObjectCollision(object1, object2);
+			}
+		}
+	}
+}
+
+void Solver::solveObjectCollision(Object* object1, Object* object2)
+{
+	// strength of bouncing response when colliding
+	constexpr float responseCoef = 0.75f;
+
+	sf::Vector2f direction = object1->currentPosition - object2->currentPosition;
+	float distance = Math::getLength(direction);
+	// the min distance to not collide is the sum of radius
+	const float minDistance = object1->radius + object2->radius;
+
+	if (distance < minDistance)
+	{
+		sf::Vector2f unit = direction / distance;
+		// use radius as ratio of bouncing
+		float total = object1->radius + object2->radius;
+		float ratio1 = object1->radius / total;
+		float ratio2 = object2->radius / total;
+
+		// distance to push to separate two objects
+		// distance - minDistance = overlappinig distance between two objects
+		// times 0.5 because each objects only need to move away half of that distance
+		float delta = responseCoef * 0.5f * (distance - minDistance);
+
+		object1->currentPosition -= unit * (ratio2 * delta);
+		object2->currentPosition += unit * (ratio1 * delta);
 	}
 }
 

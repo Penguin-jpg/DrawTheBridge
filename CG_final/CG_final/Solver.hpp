@@ -2,13 +2,13 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include "Object.hpp"
-#include "CollisionGrid.hpp"
+#include "CollisionGrid2.hpp"
 
 // this class is in charge of simulation
 class Solver
 {
 public:
-	Solver(sf::Vector2f size, float margin, float cellSize);
+	Solver(sf::Vector2f size, float margin);
 
 	void update();
 	void applyGravity();
@@ -26,6 +26,10 @@ public:
 	void solveCollisionWithWorld(Object& object);
 
 	void solveObjectCollisions();
+	void fillCollisionGrid();
+	void solveGridCollision();
+	void solveCellCollision(CollisionCell& cell1, CollisionCell& cell2);
+	void solveObjectCollision(Object* object1, Object* object2);
 
 	const float getElapsedTime();
 	void setFrameDt(const int framerate);
