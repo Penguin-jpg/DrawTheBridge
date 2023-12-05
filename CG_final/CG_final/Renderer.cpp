@@ -47,7 +47,7 @@ void Renderer::render(RenderContext& context)
 	circle.setOrigin(1.0f, 1.0f);
 	circle.setTextureRect({ 0, 0, textureSize.x, textureSize.y });
 	circle.setTexture(&texture);
-	const std::vector<Particle>& particles = solver.getParticles();
+	const civ::IndexVector<Particle>& particles = solver.getParticles();
 	for (const Particle& particle : particles)
 	{
 		circle.setPosition(particle.currentPosition);
@@ -57,7 +57,7 @@ void Renderer::render(RenderContext& context)
 	}
 
 	// vertex array of links (draw with line)
-	const std::vector<Link>& links = solver.getLinks();
+	const civ::IndexVector<Link>& links = solver.getLinks();
 	// width of line
 	const float width = 2.0f;
 	//sf::VertexArray linkVertices(sf::Lines, 2 * links.size());

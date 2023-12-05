@@ -13,11 +13,13 @@ struct Particle
 	sf::Vector2f prevPosition;
 	float radius = 1.0f;
 	RigidBody rb;
+	// whether the particle can move or not
+	bool pinned = false;
 
 	Particle() = default;
 
-	Particle(sf::Vector2f position, float radius)
-		:currentPosition(position), prevPosition(position), radius(radius)
+	Particle(sf::Vector2f position, float radius, bool pinned = false)
+		:currentPosition(position), prevPosition(position), radius(radius), pinned(pinned)
 	{
 		id = objectCounter;
 		objectCounter++;
@@ -32,6 +34,10 @@ struct Particle
 	// let Verlet integration to deal with dynamic motion
 	void update(float dt)
 	{
+		// don't need to calculate for static particle
+		if (pinned)
+			return;
+
 		// the formula is x_n = x_{n-1} + v_{n-1} * dt + a_n * dt^2
 
 		// v_{n-1} * dt = displacement traveled from previous pos to current pos

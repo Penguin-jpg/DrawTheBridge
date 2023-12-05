@@ -11,7 +11,7 @@ void Solver::update()
 
 	for (int i = 0; i < subSteps; i++)
 	{
-		//applyGravity();
+		applyGravity();
 		//fillCollisionGrid();
 		//solveGridCollision();
 		solveCollisions();
@@ -60,14 +60,13 @@ void Solver::applyForce(float radius, sf::Vector2f position)
 	}
 }
 
-Particle& Solver::addParticle(sf::Vector2f position, float radius)
+civ::Ref<Particle> Solver::addParticle(sf::Vector2f position, float radius, bool pinned)
 {
-	// in c++17, insertion return a reference of the appended particle
-	// note that another insertion will invalidate the reference
-	return particles.emplace_back(position, radius);
+	civ::ID id = particles.emplace_back(position, radius, pinned);
+	return particles.createRef(id);
 }
 
-std::vector<Particle>& Solver::getParticles()
+const civ::IndexVector<Particle>& Solver::getParticles()
 {
 	return particles;
 }
@@ -77,12 +76,13 @@ const int Solver::getNumParticles()
 	return particles.size();
 }
 
-Link& Solver::addLink(Particle* p1, Particle* p2)
+civ::Ref<Link> Solver::addLink(civ::Ref<Particle> p1, civ::Ref<Particle> p2)
 {
-	return links.emplace_back(p1, p2, Math::getLength(p1->currentPosition - p2->currentPosition));
+	civ::ID id = links.emplace_back(p1, p2, Math::getLength(p1->currentPosition - p2->currentPosition));
+	return links.createRef(id);
 }
 
-const std::vector<Link>& Solver::getLinks()
+const civ::IndexVector<Link>& Solver::getLinks()
 {
 	return links;
 }
@@ -105,7 +105,7 @@ const sf::Vector3f Solver::getConstraint()
 
 void Solver::applyConstraint()
 {
-	for (Particle& particle : particles)
+	for (Particle& particle : particles.getData())
 	{
 		// direction from current position of particle to center of constraint
 		sf::Vector2f direction = constraintCenter - particle.currentPosition;

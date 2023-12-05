@@ -1,6 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <vector>
+#include "ConstantIndexVector/index_vector.hpp"
 #include "Particle.hpp"
 #include "Link.hpp"
 #include "CollisionGrid2.hpp"
@@ -18,12 +19,12 @@ public:
 
 	void applyForce(float radius, sf::Vector2f position);
 
-	Particle& addParticle(sf::Vector2f position, float radius);
-	std::vector<Particle>& getParticles();
+	civ::Ref<Particle> addParticle(sf::Vector2f position, float radius, bool pinned = false);
+	const civ::IndexVector<Particle>& getParticles();
 	const int getNumParticles();
 
-	Link& addLink(Particle* p1, Particle* p2);
-	const std::vector<Link>& getLinks();
+	civ::Ref<Link> addLink(civ::Ref<Particle> p1, civ::Ref<Particle> p2);
+	const civ::IndexVector<Link>& getLinks();
 	const int getNumLinks();
 
 	void setConstraint(sf::Vector2f center, float radius);
@@ -47,8 +48,10 @@ public:
 
 private:
 	sf::Vector2f gravity{ 0.0f, 1000.0f };
-	std::vector<Particle> particles;
-	std::vector<Link> links;
+	civ::IndexVector<Particle> particles;
+	civ::IndexVector<Link> links;
+	//std::vector<Particle> particles;
+	//std::vector<Link> links;
 	// constraint to hold objecst inside
 	sf::Vector2f constraintCenter;
 	float constraintRadius = 100.0f;
