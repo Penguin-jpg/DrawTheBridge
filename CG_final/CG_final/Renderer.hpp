@@ -1,18 +1,19 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include "Solver.hpp"
+#include "RenderContext.hpp"
 
 class Renderer
 {
 public:
-	Renderer(sf::RenderTarget& target, Solver& solver);
+	Renderer(Solver& solver);
 
 	void initWorldBox();
 
-	void render();
+	void render(RenderContext& context);
 private:
 	// target for rendering
-	sf::RenderTarget& target;
+	//sf::RenderTarget& target;
 	// physics solver
 	Solver& solver;
 	// vertex array of world box (draw with triangle strip)

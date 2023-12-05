@@ -1,14 +1,14 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <vector>
-
 #include "Object.hpp"
+#include "CollisionGrid.hpp"
 
 // this class is in charge of simulation
 class Solver
 {
 public:
-	Solver() = default;
+	Solver(sf::Vector2f size, float margin, float cellSize);
 
 	void update();
 	void applyGravity();
@@ -22,11 +22,10 @@ public:
 	const sf::Vector3f getConstraint();
 	void applyConstraint();
 
-	void setWorldSize(sf::Vector2f size, float margin);
 	const sf::Vector3f getWorld();
 	void solveCollisionWithWorld(Object& object);
 
-	void solveObjectCollisions(float dt);
+	void solveObjectCollisions();
 
 	const float getElapsedTime();
 	void setFrameDt(const int framerate);
@@ -42,6 +41,8 @@ private:
 	float constraintRadius = 100.0f;
 	// world box
 	sf::Vector2f worldSize;
+	// collision grid
+	CollisionGrid grid;
 	float margin = 1.0f;
 	// timer
 	float elapsedTime = 0.0f;

@@ -144,16 +144,23 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="RenderContext.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Solver.cpp" />
+    <ClCompile Include="TransformManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CollisionGrid.hpp" />
+    <ClInclude Include="Game.hpp" />
     <ClInclude Include="Random.hpp" />
+    <ClInclude Include="RenderContext.hpp" />
     <ClInclude Include="RigidBody.hpp" />
     <ClInclude Include="Math.hpp" />
     <ClInclude Include="Object.hpp" />
     <ClInclude Include="Renderer.hpp" />
     <ClInclude Include="Solver.hpp" />
+    <ClInclude Include="TransformManager.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\circle.png" />

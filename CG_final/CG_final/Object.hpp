@@ -2,9 +2,12 @@
 #include <SFML/Graphics.hpp>
 #include "RigidBody.hpp"
 
+static int objectCounter = 0;
 
 struct Object
 {
+	// use an id to identify an object
+	int id = 0;
 	sf::Vector2f currentPosition;
 	sf::Vector2f prevPosition;
 	float radius = 1.0f;
@@ -13,7 +16,11 @@ struct Object
 	Object() = default;
 
 	Object(sf::Vector2f position, float radius)
-		:currentPosition(position), prevPosition(position), radius(radius) {}
+		:currentPosition(position), prevPosition(position), radius(radius)
+	{
+		id = objectCounter;
+		objectCounter++;
+	}
 
 	void initVelocity(sf::Vector2f v, float dt)
 	{

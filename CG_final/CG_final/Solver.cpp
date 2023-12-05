@@ -2,6 +2,9 @@
 #include "Math.hpp"
 #include <iostream>
 
+Solver::Solver(sf::Vector2f size, float margin, float cellSize)
+	:worldSize(size), margin(margin), grid(size, cellSize) {}
+
 void Solver::update()
 {
 	elapsedTime += frameDt;
@@ -9,7 +12,9 @@ void Solver::update()
 	for (int i = 0; i < subSteps; i++)
 	{
 		applyGravity();
-		solveObjectCollisions(stepDt);
+		solveObjectCollisions();
+		//grid.clearGrid();
+		//grid.checkCellCollisions();
 		//applyConstraint();
 		updateObjects(stepDt);
 	}
@@ -35,7 +40,9 @@ void Solver::updateObjects(float dt)
 Object& Solver::addObject(sf::Vector2f position, float radius)
 {
 	// in c++17, emplace_back return a reference of the appended object
-	return objects.emplace_back(position, radius);
+	Object& object = objects.emplace_back(position, radius);
+	grid.addObject(object);
+	return object;
 }
 
 const std::vector<Object>& Solver::getObjects()
@@ -77,12 +84,6 @@ void Solver::applyConstraint()
 	}
 }
 
-void Solver::setWorldSize(sf::Vector2f size, float _margin)
-{
-	worldSize = size;
-	margin = _margin;
-}
-
 const sf::Vector3f Solver::getWorld()
 {
 	return { worldSize.x, worldSize.y, margin };
@@ -109,7 +110,7 @@ void Solver::solveCollisionWithWorld(Object& object)
 	}
 }
 
-void Solver::solveObjectCollisions(float dt)
+void Solver::solveObjectCollisions()
 {
 	// strength of bouncing response when colliding
 	const float responseStrength = 0.75f;
