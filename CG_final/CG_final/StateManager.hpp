@@ -33,16 +33,15 @@ public:
 	void updateTransform();
 
 	// set the focus location of camera
-	void setFocus(sf::Vector2f focus);
+	void setFocus(const sf::Vector2f& focus);
 	void setZoom(float zoom);
-
-	void adjustOffset(sf::Vector2f amount);
+	void adjustOffset(const sf::Vector2f& amount);
 
 	// mouse-related functions
-	void click(sf::Vector2f clickedMousePosition);
+	void click(const sf::Vector2f& clickedMousePosition);
 	void release();
 	bool isClicked();
-	void updateMousePosition(sf::Vector2f newMousePosition);
+	void updateMousePosition(const sf::Vector2f& newMousePosition);
 	const sf::Vector2f getScreenMousePosition();
 	const sf::Vector2f getWorldMousePosition();
 

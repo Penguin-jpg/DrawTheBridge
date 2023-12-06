@@ -45,7 +45,7 @@ void Solver::updateLinks(float dt)
 	}
 }
 
-void Solver::applyForce(float radius, sf::Vector2f position)
+void Solver::applyForce(float radius, const sf::Vector2f& position)
 {
 	for (Particle& particle : particles)
 	{
@@ -59,7 +59,7 @@ void Solver::applyForce(float radius, sf::Vector2f position)
 	}
 }
 
-civ::Ref<Particle> Solver::addParticle(sf::Vector2f position, float radius, bool pinned)
+civ::Ref<Particle> Solver::addParticle(const sf::Vector2f& position, float radius, bool pinned)
 {
 	civ::ID id = particles.emplace_back(position, radius, pinned);
 	return particles.createRef(id);
@@ -91,7 +91,7 @@ const int Solver::getNumLinks()
 	return links.size();
 }
 
-void Solver::addCube(sf::Vector2f position, bool soft, bool pinned)
+void Solver::addCube(const sf::Vector2f& position, bool soft, bool pinned)
 {
 	// use offset so that cube will be drawn at exactly that position
 	float offset = 10.0f;

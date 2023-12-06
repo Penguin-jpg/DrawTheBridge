@@ -23,7 +23,7 @@ void StateManager::updateTransform()
 	state.transform.translate(-state.offset);
 }
 
-void StateManager::setFocus(sf::Vector2f focus)
+void StateManager::setFocus(const sf::Vector2f& focus)
 {
 	state.offset = focus;
 	updateTransform();
@@ -35,14 +35,14 @@ void StateManager::setZoom(float zoom)
 	updateTransform();
 }
 
-void StateManager::adjustOffset(sf::Vector2f amount)
+void StateManager::adjustOffset(const sf::Vector2f& amount)
 {
 	// need to consider zoom
 	state.offset += amount / state.zoom;
 	updateTransform();
 }
 
-void StateManager::click(sf::Vector2f clickedMousePosition)
+void StateManager::click(const sf::Vector2f& clickedMousePosition)
 {
 	state.clicked = true;
 	state.screenMousePosition = clickedMousePosition;
@@ -58,7 +58,7 @@ bool StateManager::isClicked()
 	return state.clicked;
 }
 
-void StateManager::updateMousePosition(sf::Vector2f newMousePosition)
+void StateManager::updateMousePosition(const sf::Vector2f& newMousePosition)
 {
 	if (state.clicked)
 	{

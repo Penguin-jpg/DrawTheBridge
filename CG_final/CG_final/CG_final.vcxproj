@@ -156,7 +156,6 @@
     <ClInclude Include="Link.hpp" />
     <ClInclude Include="Random.hpp" />
     <ClInclude Include="RenderContext.hpp" />
-    <ClInclude Include="RigidBody.hpp" />
     <ClInclude Include="Math.hpp" />
     <ClInclude Include="Particle.hpp" />
     <ClInclude Include="Renderer.hpp" />

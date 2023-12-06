@@ -20,7 +20,7 @@ struct RenderContext
 		window.draw(drawable, states);
 	}
 
-	void setFocus(sf::Vector2f focus)
+	void setFocus(const sf::Vector2f& focus)
 	{
 		stateManager.setFocus(focus);
 	}

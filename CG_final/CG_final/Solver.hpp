@@ -17,9 +17,9 @@ public:
 	void updateParticles(float dt);
 	void updateLinks(float dt);
 
-	void applyForce(float radius, sf::Vector2f position);
+	void applyForce(float radius, const sf::Vector2f& position);
 
-	civ::Ref<Particle> addParticle(sf::Vector2f position, float radius, bool pinned = false);
+	civ::Ref<Particle> addParticle(const sf::Vector2f& position, float radius, bool pinned = false);
 	const civ::IndexVector<Particle>& getParticles();
 	const int getNumParticles();
 
@@ -27,7 +27,7 @@ public:
 	const civ::IndexVector<Link>& getLinks();
 	const int getNumLinks();
 
-	void addCube(sf::Vector2f position, bool soft = true, bool pinned = false);
+	void addCube(const sf::Vector2f& position, bool soft = true, bool pinned = false);
 
 	const sf::Vector3f getWorld();
 	void solveCollisionWithWorld(Particle& particle);

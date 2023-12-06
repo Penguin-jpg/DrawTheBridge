@@ -26,7 +26,7 @@ struct Particle
 		objectCounter++;
 	}
 
-	void initVelocity(sf::Vector2f v, float dt)
+	void initVelocity(const sf::Vector2f& v, float dt)
 	{
 		//rb.velocity = v;
 		prevPosition = currentPosition - (v * dt);
@@ -56,7 +56,7 @@ struct Particle
 		acceleration = { 0.0f, 0.0f };
 	}
 
-	void applyForce(sf::Vector2f force)
+	void applyForce(const sf::Vector2f& force)
 	{
 		// F = m * a -> a = F / m
 		sf::Vector2f a = force / mass;
