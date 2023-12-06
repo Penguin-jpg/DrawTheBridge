@@ -18,13 +18,16 @@ int main()
 	const int MAX_NUM_OBJECTS = 10;
 	const float OBJECT_MIN_RADIUS = 10.0f;
 	const float OBJECT_MAX_RADIUS = 20.0f;
-	const float OBJECT_SPAWN_DELAY = 0.1f;
+	const float OBJECT_SPAWN_DELAY = 0.3f;
 	const float OBJECT_SPPED = 1200.0f;
 	const sf::Vector2f SPAWN_LOCATION = { 100.0f, 100.0f };
-	//const sf::Vector2f WORLD_SIZE = { 1000.0f, 1000.0f };
 	const sf::Vector2f WORLD_SIZE = { 300.0f, 300.0f };
 
+	// control
 	bool force = false;
+	bool buildMode = false;
+	bool buildCube = false;
+	bool pinned = false;
 
 	Game game(WINDOW_WIDTH, WINDOW_HEIGHT, "SFML Game", sf::Style::Default);
 	RenderContext& context = game.getRenderContext();
@@ -43,40 +46,26 @@ int main()
 	Renderer renderer(solver);
 	RNG rng;
 
-	//solver.setConstraint({ WINDOW_WIDTH * 0.5f, WINDOW_HEIGHT * 0.5f }, 450.0f);
 	solver.setFrameDt(FRAMERATE);
 	solver.setSubSteps(NUM_SUB_STEPS);
 
-	/*if (context.stateManager.isClicked() && timer.getElapsedTime().asSeconds() >= OBJECT_SPAWN_DELAY)
-	{*/
-	sf::Vector2f pos = SPAWN_LOCATION;
-	/*Particle* p1 = solver.addParticle(pos + sf::Vector2f(0.0f, 0.0f), 10.0f);
-	Particle* p2 = solver.addParticle(pos + sf::Vector2f(40.0f, 0.0f), 10.0f);*/
-	civ::Ref<Particle> p1 = solver.addParticle(pos + sf::Vector2f(0.0f, 0.0f), 10.0f);
-	civ::Ref<Particle> p2 = solver.addParticle(pos + sf::Vector2f(40.0f, 0.0f), 10.0f);
-	civ::Ref<Link> link = solver.addLink(p1, p2);
-	std::cout << pos.x << " " << pos.y << std::endl;
-	std::cout << p1->currentPosition.x << " " << p1->currentPosition.y << std::endl;
-	std::cout << p2->currentPosition.x << " " << p2->currentPosition.y << std::endl;
-	//}
-	/*solver.addParticle(SPAWN_LOCATION, 10.0f, true);
-	solver.addParticle(SPAWN_LOCATION + sf::Vector2f(20.0f, 0.0f), 10.0f);
-	solver.addParticle(SPAWN_LOCATION + sf::Vector2f(40.0f, 0.0f), 10.0f);
-	solver.addParticle(SPAWN_LOCATION + sf::Vector2f(60.0f, 0.0f), 10.0f);
-	std::vector<Particle>& particles = solver.getParticles();
-	Particle* p1 = &particles[0];
-	Particle* p2 = &particles[1];
-	Particle* p3 = &particles[2];
-	Particle* p4 = &particles[3];
-	solver.addLink(p1, p2);
-	solver.addLink(p2, p3);
-	solver.addLink(p3, p4);*/
-
-	game.getEventManager().addMousePressedCallback(sf::Mouse::Right, [&](const sf::Event& event) {
+	// add additional events
+	sfev::EventManager& eventManager = game.getEventManager();
+	eventManager.addMousePressedCallback(sf::Mouse::Right, [&](const sf::Event& event) {
 		force = true;
 		});
-	game.getEventManager().addMouseReleasedCallback(sf::Mouse::Right, [&](const sf::Event& event) {
+	eventManager.addMouseReleasedCallback(sf::Mouse::Right, [&](const sf::Event& event) {
 		force = false;
+		});
+	eventManager.addMousePressedCallback(sf::Mouse::Middle, [&](const sf::Event& event) {
+		buildMode = true;
+		});
+	eventManager.addMouseReleasedCallback(sf::Mouse::Middle, [&](const sf::Event& event) {
+		buildMode = false;
+		});
+	eventManager.addKeyPressedCallback(sf::Keyboard::P, [&](const sf::Event& event) {
+		//pinned = !pinned;
+		buildCube = !buildCube;
 		});
 
 	while (game.isRunning())
@@ -92,10 +81,20 @@ int main()
 		}*/
 
 		//if (!dragging)
+		if (buildMode && timer.getElapsedTime().asSeconds() >= OBJECT_SPAWN_DELAY)
+		{
+			timer.restart();
+			if (buildCube)
+				solver.addCube(game.getWorldMousePosition(), true);
+			else
+				solver.addParticle(game.getWorldMousePosition(), 10.0f);
+		}
+
 		if (force)
 			solver.applyForce(150.0f, game.getWorldMousePosition());
+
 		solver.update();
-		game.clear(sf::Color::Black);
+		game.clear();
 		renderer.render(context);
 		game.display();
 	}

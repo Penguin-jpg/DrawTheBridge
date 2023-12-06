@@ -16,7 +16,7 @@ public:
 	// functions for main loop
 	bool isRunning();
 	void handleEvents();
-	void clear(sf::Color clearColor);
+	void clear(sf::Color clearColor = sf::Color::Black);
 	void display();
 
 	void setFramerate(int framerate);

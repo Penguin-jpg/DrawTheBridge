@@ -25,22 +25,20 @@ void Renderer::initWorldBox()
 
 void Renderer::render(RenderContext& context)
 {
-	// draw constraint
-	/*const sf::Vector3f constraintInfo = solver.getConstraint();
-	sf::CircleShape constraint(constraintInfo.z);
-	constraint.setOrigin({ constraintInfo.z,constraintInfo.z });
-	constraint.setFillColor(sf::Color::Black);
-	constraint.setPosition({ constraintInfo.x, constraintInfo.y });
-	constraint.setPointCount(128);
-	target.draw(constraint);*/
-
 	// render state to store transform and texture
 	sf::RenderStates states;
-	const sf::Vector2i textureSize = (sf::Vector2i)texture.getSize();
 
 	// draw world box
 	context.draw(worldBox, states);
+	// draw particles
+	drawParticles(context, states);
+	// draw links
+	//drawLinks(context, states);
+}
 
+void Renderer::drawParticles(RenderContext& context, sf::RenderStates& states)
+{
+	const sf::Vector2i textureSize = (sf::Vector2i)texture.getSize();
 	// draw a cirlce to represent an object
 	sf::CircleShape circle(1.0f);
 	//circle.setPointCount(32);
@@ -55,18 +53,18 @@ void Renderer::render(RenderContext& context)
 		//circle.setFillColor(sf::Color::Green);
 		context.draw(circle, states);
 	}
+}
 
+void Renderer::drawLinks(RenderContext& context, sf::RenderStates& states)
+{
 	// vertex array of links (draw with line)
 	const civ::IndexVector<Link>& links = solver.getLinks();
 	// width of line
 	const float width = 2.0f;
-	//sf::VertexArray linkVertices(sf::Lines, 2 * links.size());
 	sf::VertexArray linkVertices(sf::Quads);
 	for (int i = 0; i < links.size(); i++)
 	{
 		const Link& link = links[i];
-		/*linkVertices[2 * i] = sf::Vertex(link.p1->currentPosition, sf::Color::Red, {});
-		linkVertices[2 * i + 1] = sf::Vertex(link.p2->currentPosition, sf::Color::Red, {});*/
 		drawThickLine(linkVertices, link.p1->currentPosition, link.p2->currentPosition, width, sf::Color::Red);
 	}
 	context.draw(linkVertices, states);

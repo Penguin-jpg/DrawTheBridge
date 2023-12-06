@@ -27,9 +27,7 @@ public:
 	const civ::IndexVector<Link>& getLinks();
 	const int getNumLinks();
 
-	void setConstraint(sf::Vector2f center, float radius);
-	const sf::Vector3f getConstraint();
-	void applyConstraint();
+	void addCube(sf::Vector2f position, bool soft = true);
 
 	const sf::Vector3f getWorld();
 	void solveCollisionWithWorld(Particle& particle);
@@ -50,11 +48,6 @@ private:
 	sf::Vector2f gravity{ 0.0f, 1000.0f };
 	civ::IndexVector<Particle> particles;
 	civ::IndexVector<Link> links;
-	//std::vector<Particle> particles;
-	//std::vector<Link> links;
-	// constraint to hold objecst inside
-	sf::Vector2f constraintCenter;
-	float constraintRadius = 100.0f;
 	// world box
 	sf::Vector2f worldSize;
 	// collision grid

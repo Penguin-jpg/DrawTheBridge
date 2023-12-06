@@ -11,6 +11,9 @@ public:
 	void initWorldBox();
 
 	void render(RenderContext& context);
+
+	void drawParticles(RenderContext& context, sf::RenderStates& states);
+	void drawLinks(RenderContext& context, sf::RenderStates& states);
 	void drawThickLine(sf::VertexArray& va, const sf::Vector2f& start, const sf::Vector2f& end, float width, sf::Color color);
 
 private:

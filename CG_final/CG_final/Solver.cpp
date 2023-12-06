@@ -15,7 +15,6 @@ void Solver::update()
 		//fillCollisionGrid();
 		//solveGridCollision();
 		solveCollisions();
-		//applyConstraint();
 		updateParticles(stepDt);
 		updateLinks(stepDt);
 	}
@@ -92,32 +91,41 @@ const int Solver::getNumLinks()
 	return links.size();
 }
 
-void Solver::setConstraint(sf::Vector2f center, float radius)
+void Solver::addCube(sf::Vector2f position, bool soft)
 {
-	constraintCenter = center;
-	constraintRadius = radius;
-}
+	// use offset so that cube will be drawn at exactly that position
+	float offset = 10.0f;
 
-const sf::Vector3f Solver::getConstraint()
-{
-	return { constraintCenter.x, constraintCenter.y, constraintRadius };
-}
-
-void Solver::applyConstraint()
-{
-	for (Particle& particle : particles.getData())
+	// a cube is composed of 9 particles and 12 links
+	// I use more particles in order to simulate more dynamic motion
+	civ::Ref<Particle> p1 = addParticle({ position.x - offset, position.y - offset }, 5.0f);
+	civ::Ref<Particle> p2 = addParticle({ position.x, position.y - offset }, 5.0f);
+	civ::Ref<Particle> p3 = addParticle({ position.x + offset, position.y - offset }, 5.0f);
+	civ::Ref<Particle> p4 = addParticle({ position.x - offset, position.y }, 5.0f);
+	civ::Ref<Particle> p5 = addParticle({ position.x , position.y }, 5.0f);
+	civ::Ref<Particle> p6 = addParticle({ position.x + offset, position.y }, 5.0f);
+	civ::Ref<Particle> p7 = addParticle({ position.x - offset, position.y + offset }, 5.0f);
+	civ::Ref<Particle> p8 = addParticle({ position.x, position.y + offset }, 5.0f);
+	civ::Ref<Particle> p9 = addParticle({ position.x + offset, position.y + offset }, 5.0f);
+	addLink(p1, p2);
+	addLink(p2, p3);
+	addLink(p1, p4);
+	addLink(p2, p5);
+	addLink(p3, p6);
+	addLink(p4, p5);
+	addLink(p5, p6);
+	addLink(p4, p7);
+	addLink(p5, p8);
+	addLink(p6, p9);
+	addLink(p7, p8);
+	addLink(p8, p9);
+	// if this is not a soft box, add links for every diagonal to strengthen it
+	if (!soft)
 	{
-		// direction from current position of particle to center of constraint
-		sf::Vector2f direction = constraintCenter - particle.currentPosition;
-		float distance = Math::getLength(direction);
-		// if particle is outside of contraint, put it back along the unit direction vector
-		if (distance > (constraintRadius - particle.radius))
-		{
-			std::cout << "!\n";
-			sf::Vector2f unit = direction / distance;
-			// constraintRadius - particle.radius = how far the particle out of the constraint
-			particle.currentPosition = constraintCenter - unit * (constraintRadius - particle.radius);
-		}
+		addLink(p1, p5);
+		addLink(p5, p9);
+		addLink(p3, p5);
+		addLink(p5, p7);
 	}
 }
 
