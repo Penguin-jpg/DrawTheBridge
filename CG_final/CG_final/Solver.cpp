@@ -171,7 +171,7 @@ void Solver::solveCollisions()
 
 			sf::Vector2f direction = p1.currentPosition - p2.currentPosition;
 			float distance = Math::getLength(direction);
-			// the min distance to not collide is the sum of radius
+			// the min distance to not overlap is the sum of radius
 			const float minDistance = p1.radius + p2.radius;
 
 			if (distance < minDistance)
@@ -183,12 +183,12 @@ void Solver::solveCollisions()
 				float ratio2 = p2.radius / total;
 
 				// distance to push to separate two particles
-				// distance - minDistance = overlappinig distance between two particles
+				// minDistance - distance = overlappinig distance between two particles
 				// times 0.5 because each particles only need to move away half of that distance
-				float delta = responseStrength * 0.5f * (distance - minDistance);
+				float delta = responseStrength * 0.5f * (minDistance - distance);
 
-				p1.currentPosition -= unit * (ratio2 * delta);
-				p2.currentPosition += unit * (ratio1 * delta);
+				p1.currentPosition += unit * (ratio2 * delta);
+				p2.currentPosition -= unit * (ratio1 * delta);
 			}
 		}
 	}
