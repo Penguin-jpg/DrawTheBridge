@@ -27,7 +27,7 @@ public:
 	const civ::IndexVector<Link>& getLinks();
 	const int getNumLinks();
 
-	void addCube(sf::Vector2f position, bool soft = true);
+	void addCube(sf::Vector2f position, bool soft = true, bool pinned = false);
 
 	const sf::Vector3f getWorld();
 	void solveCollisionWithWorld(Particle& particle);

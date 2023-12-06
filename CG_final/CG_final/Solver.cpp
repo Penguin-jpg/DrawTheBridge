@@ -91,22 +91,22 @@ const int Solver::getNumLinks()
 	return links.size();
 }
 
-void Solver::addCube(sf::Vector2f position, bool soft)
+void Solver::addCube(sf::Vector2f position, bool soft, bool pinned)
 {
 	// use offset so that cube will be drawn at exactly that position
 	float offset = 10.0f;
 
 	// a cube is composed of 9 particles and 12 links
 	// I use more particles in order to simulate more dynamic motion
-	civ::Ref<Particle> p1 = addParticle({ position.x - offset, position.y - offset }, 5.0f);
-	civ::Ref<Particle> p2 = addParticle({ position.x, position.y - offset }, 5.0f);
-	civ::Ref<Particle> p3 = addParticle({ position.x + offset, position.y - offset }, 5.0f);
-	civ::Ref<Particle> p4 = addParticle({ position.x - offset, position.y }, 5.0f);
-	civ::Ref<Particle> p5 = addParticle({ position.x , position.y }, 5.0f);
-	civ::Ref<Particle> p6 = addParticle({ position.x + offset, position.y }, 5.0f);
-	civ::Ref<Particle> p7 = addParticle({ position.x - offset, position.y + offset }, 5.0f);
-	civ::Ref<Particle> p8 = addParticle({ position.x, position.y + offset }, 5.0f);
-	civ::Ref<Particle> p9 = addParticle({ position.x + offset, position.y + offset }, 5.0f);
+	civ::Ref<Particle> p1 = addParticle({ position.x - offset, position.y - offset }, 5.0f, pinned);
+	civ::Ref<Particle> p2 = addParticle({ position.x, position.y - offset }, 5.0f, pinned);
+	civ::Ref<Particle> p3 = addParticle({ position.x + offset, position.y - offset }, 5.0f, pinned);
+	civ::Ref<Particle> p4 = addParticle({ position.x - offset, position.y }, 5.0f, pinned);
+	civ::Ref<Particle> p5 = addParticle({ position.x , position.y }, 5.0f, pinned);
+	civ::Ref<Particle> p6 = addParticle({ position.x + offset, position.y }, 5.0f, pinned);
+	civ::Ref<Particle> p7 = addParticle({ position.x - offset, position.y + offset }, 5.0f, pinned);
+	civ::Ref<Particle> p8 = addParticle({ position.x, position.y + offset }, 5.0f, pinned);
+	civ::Ref<Particle> p9 = addParticle({ position.x + offset, position.y + offset }, 5.0f, pinned);
 	addLink(p1, p2);
 	addLink(p2, p3);
 	addLink(p1, p4);

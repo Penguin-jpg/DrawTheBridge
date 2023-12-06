@@ -20,8 +20,10 @@ public:
 	void display();
 
 	void setFramerate(int framerate);
-	void addEvents();
+	void addBasicEvents();
 
+	void click();
+	void release();
 	const sf::Vector2f getScreenMousePosition();
 	const sf::Vector2f getWorldMousePosition();
 
