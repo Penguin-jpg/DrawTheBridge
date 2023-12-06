@@ -1,6 +1,5 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include "RigidBody.hpp"
 
 static int objectCounter = 0;
 
@@ -11,8 +10,10 @@ struct Particle
 	int id = 0;
 	sf::Vector2f currentPosition;
 	sf::Vector2f prevPosition;
+	float mass = 1.0f;
+	sf::Vector2f velocity;
+	sf::Vector2f acceleration;
 	float radius = 1.0f;
-	RigidBody rb;
 	// whether the particle can move or not
 	bool pinned = false;
 
@@ -43,7 +44,7 @@ struct Particle
 		// v_{n-1} * dt = displacement traveled from previous pos to current pos
 		sf::Vector2f displacement = currentPosition - prevPosition;
 		//sf::Vector2f displacement = rb.velocity * dt;
-		sf::Vector2f newPosition = currentPosition + displacement + rb.acceleration * dt * dt;
+		sf::Vector2f newPosition = currentPosition + displacement + acceleration * dt * dt;
 
 		// update position
 		prevPosition = currentPosition;
@@ -52,6 +53,13 @@ struct Particle
 		//rb.velocity = (currentPosition - prevPosition) / dt;
 
 		// reset acceleration for next calculation
-		rb.resetAcceleration();
+		acceleration = { 0.0f, 0.0f };
+	}
+
+	void applyForce(sf::Vector2f force)
+	{
+		// F = m * a -> a = F / m
+		sf::Vector2f a = force / mass;
+		acceleration += a;
 	}
 };

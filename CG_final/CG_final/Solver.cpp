@@ -24,7 +24,7 @@ void Solver::applyGravity()
 {
 	for (Particle& particle : particles)
 	{
-		particle.rb.applyForce(gravity);
+		particle.applyForce(gravity);
 	}
 }
 
@@ -54,7 +54,7 @@ void Solver::applyForce(float radius, sf::Vector2f position)
 		std::cout << distance << std::endl;
 		if (distance < radius)
 		{
-			particle.rb.applyForce(1.f * (radius - distance) * direction);
+			particle.applyForce(1.f * (radius - distance) * direction);
 		}
 	}
 }
