@@ -4,13 +4,13 @@
 #include "ConstantIndexVector/index_vector.hpp"
 #include "Particle.hpp"
 #include "Link.hpp"
-#include "CollisionGrid2.hpp"
+#include "CollisionGrid.hpp"
 
 // this class is in charge of simulation
 class Solver
 {
 public:
-	Solver(sf::Vector2f size, float margin);
+	Solver(sf::Vector2f size, float margin, int cellSize);
 
 	void update();
 	void applyGravity();
@@ -32,8 +32,8 @@ public:
 	const sf::Vector3f getWorld();
 	void solveCollisionWithWorld(Particle& particle);
 
-	void solveCollisions();
 	void fillCollisionGrid();
+	void solveCollisions();
 	void solveGridCollision();
 	void solveCellCollision(CollisionCell& cell1, CollisionCell& cell2);
 	void solveParticleCollision(Particle* p1, Particle* p2);
@@ -43,6 +43,11 @@ public:
 
 	void setSubSteps(const int _subSteps);
 	const float getStepDt();
+
+	const CollisionGrid& getGrid()
+	{
+		return grid;
+	}
 
 private:
 	sf::Vector2f gravity{ 0.0f, 1000.0f };

@@ -2,8 +2,8 @@
 #include "Math.hpp"
 #include <iostream>
 
-Solver::Solver(sf::Vector2f size, float margin)
-	:worldSize(size), margin(margin), grid(size.x, size.y) {}
+Solver::Solver(sf::Vector2f size, float margin, int cellSize)
+	:worldSize(size), margin(margin), grid(size.x, size.y, cellSize) {}
 
 void Solver::update()
 {
@@ -12,9 +12,9 @@ void Solver::update()
 	for (int i = 0; i < subSteps; i++)
 	{
 		applyGravity();
-		//fillCollisionGrid();
-		//solveGridCollision();
-		solveCollisions();
+		fillCollisionGrid();
+		solveGridCollision();
+		//solveCollisions();
 		updateParticles(stepDt);
 		updateLinks(stepDt);
 	}
@@ -51,7 +51,6 @@ void Solver::applyForce(float radius, const sf::Vector2f& position)
 	{
 		sf::Vector2f direction = particle.currentPosition - position;
 		float distance = Math::getLength(direction);
-		std::cout << distance << std::endl;
 		if (distance < radius)
 		{
 			particle.applyForce(1.f * (radius - distance) * direction);
@@ -198,7 +197,6 @@ void Solver::fillCollisionGrid()
 {
 	// initialize the grid
 	grid.clearGrid();
-
 	for (Particle& particle : particles)
 	{
 		grid.addObject(particle);
@@ -207,21 +205,26 @@ void Solver::fillCollisionGrid()
 
 void Solver::solveGridCollision()
 {
-	// we will check every neighbor so start from 1 to prevent out of bound
-	for (int row = 1; row < grid.numRows - 1; row++)
+	for (int row = 0; row < grid.numRows; row++)
 	{
-		for (int col = 1; col < grid.numCols - 1; col++)
+		for (int col = 0; col < grid.numCols; col++)
 		{
-			// current cell
 			CollisionCell& currentCell = grid.getCell(row, col);
-
 			// check its neighbors
 			for (int i = -1; i <= 1; i++)
 			{
 				for (int j = -1; j <= 1; j++)
 				{
-					CollisionCell& neighborCell = grid.getCell(row + i, col + j);
-					solveCellCollision(currentCell, neighborCell);
+					// if neighbor out of bound, check collision inside the current cell
+					if (row + i < 0 || row + i >= grid.numRows || col + j < 0 || col + j >= grid.numCols)
+					{
+						solveCellCollision(currentCell, currentCell);
+					}
+					else
+					{
+						CollisionCell& neighborCell = grid.getCell(row + i, col + j);
+						solveCellCollision(currentCell, neighborCell);
+					}
 				}
 			}
 		}
@@ -230,11 +233,14 @@ void Solver::solveGridCollision()
 
 void Solver::solveCellCollision(CollisionCell& cell1, CollisionCell& cell2)
 {
-	for (Particle* p1 : cell1.objects)
+	for (int i = 0; i < cell1.numObjects; i++)
 	{
-		for (Particle* p2 : cell2.objects)
+		Particle* p1 = cell1.objects[i];
+		for (int j = 0; j < cell2.numObjects; j++)
 		{
-			if (p1 != nullptr && p2 != nullptr && p1->id != p2->id)
+			Particle* p2 = cell2.objects[j];
+
+			if (p1->id != p2->id)
 			{
 				solveParticleCollision(p1, p2);
 			}
@@ -249,7 +255,7 @@ void Solver::solveParticleCollision(Particle* p1, Particle* p2)
 
 	sf::Vector2f direction = p1->currentPosition - p2->currentPosition;
 	float distance = Math::getLength(direction);
-	// the min distance to not collide is the sum of radius
+	// the min distance to not overlap is the sum of radius
 	const float minDistance = p1->radius + p2->radius;
 
 	if (distance < minDistance)
@@ -261,12 +267,12 @@ void Solver::solveParticleCollision(Particle* p1, Particle* p2)
 		float ratio2 = p2->radius / total;
 
 		// distance to push to separate two particles
-		// distance - minDistance = overlappinig distance between two particles
+		// minDistance - distance = overlappinig distance between two particles
 		// times 0.5 because each particles only need to move away half of that distance
-		float delta = responseCoef * 0.5f * (distance - minDistance);
+		float delta = responseCoef * 0.5f * (minDistance - distance);
 
-		p1->currentPosition -= unit * (ratio2 * delta);
-		p2->currentPosition += unit * (ratio1 * delta);
+		p1->currentPosition += unit * (ratio2 * delta);
+		p2->currentPosition -= unit * (ratio1 * delta);
 	}
 }
 

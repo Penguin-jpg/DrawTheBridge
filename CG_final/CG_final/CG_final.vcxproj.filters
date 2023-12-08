@@ -47,9 +47,6 @@
     <ClInclude Include="Random.hpp">
       <Filter>標頭檔</Filter>
     </ClInclude>
-    <ClInclude Include="CollisionGrid.hpp">
-      <Filter>標頭檔</Filter>
-    </ClInclude>
     <ClInclude Include="StateManager.hpp">
       <Filter>標頭檔</Filter>
     </ClInclude>
@@ -59,10 +56,10 @@
     <ClInclude Include="RenderContext.hpp">
       <Filter>標頭檔</Filter>
     </ClInclude>
-    <ClInclude Include="CollisionGrid2.hpp">
+    <ClInclude Include="Link.hpp">
       <Filter>標頭檔</Filter>
     </ClInclude>
-    <ClInclude Include="Link.hpp">
+    <ClInclude Include="CollisionGrid.hpp">
       <Filter>標頭檔</Filter>
     </ClInclude>
   </ItemGroup>

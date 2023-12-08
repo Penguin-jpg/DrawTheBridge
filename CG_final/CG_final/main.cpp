@@ -14,13 +14,16 @@ int main()
 	const int WINDOW_HEIGHT = 1080;
 	const int FRAMERATE = 60;
 	const int NUM_SUB_STEPS = 8;
-	const int MAX_NUM_OBJECTS = 1000;
+	const int MAX_NUM_OBJECTS = 2000;
+	const float OBJECT_RADIUS = 5.0f;
+	const int CELL_SIZE = 2 * OBJECT_RADIUS;
+	const float WORLD_BOX_MARGIN = OBJECT_RADIUS;
 	const float OBJECT_MIN_RADIUS = 10.0f;
 	const float OBJECT_MAX_RADIUS = 20.0f;
 	const float OBJECT_SPAWN_DELAY = 0.025f;
 	const float OBJECT_SPPED = 1200.0f;
 	const sf::Vector2f SPAWN_LOCATION = { 100.0f, 100.0f };
-	const sf::Vector2f WORLD_SIZE = { 1000.0f, 1000.0f };
+	const sf::Vector2f WORLD_SIZE = { 300.0f, 300.0f };
 
 	// control varaibles
 	bool useForce = false; // apply force on objects
@@ -42,7 +45,7 @@ int main()
 	// timer for game
 	sf::Clock timer;
 
-	Solver solver(WORLD_SIZE, OBJECT_MAX_RADIUS);
+	Solver solver(WORLD_SIZE, WORLD_BOX_MARGIN, CELL_SIZE);
 	Renderer renderer(solver);
 	RNG rng;
 
@@ -86,20 +89,21 @@ int main()
 
 		if (solver.getNumParticles() < MAX_NUM_OBJECTS && timer.getElapsedTime().asSeconds() >= OBJECT_SPAWN_DELAY) {
 			timer.restart();
-			civ::Ref<Particle> particle = solver.addParticle(SPAWN_LOCATION, rng.sampleFromRange(OBJECT_MIN_RADIUS, OBJECT_MAX_RADIUS));
+			/*civ::Ref<Particle> particle = solver.addParticle(SPAWN_LOCATION, rng.sampleFromRange(OBJECT_MIN_RADIUS, OBJECT_MAX_RADIUS));*/
+			civ::Ref<Particle> particle = solver.addParticle(SPAWN_LOCATION, OBJECT_RADIUS);
 			const float elapsedTime = solver.getElapsedTime();
 			const float angle = sin(elapsedTime) + Math::PI * 0.5f;
 			particle->initVelocity(OBJECT_SPPED * sf::Vector2f(cos(angle), sin(angle)), solver.getStepDt());
 		}
 
-		if (isBuilding && timer.getElapsedTime().asSeconds() >= OBJECT_SPAWN_DELAY)
+		if (isBuilding && timer.getElapsedTime().asSeconds() >= 0.3f)
 		{
 			timer.restart();
 			const sf::Vector2f mousePosition = game.getWorldMousePosition();
 			switch (buildMode)
 			{
 			case 0:
-				solver.addParticle(mousePosition, 10.0f, pinned);
+				solver.addParticle(mousePosition, OBJECT_RADIUS, pinned);
 				break;
 			case 1:
 				solver.addCube(mousePosition, true, pinned);

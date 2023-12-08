@@ -1,115 +1,127 @@
 #pragma once
+#include <SFML/Graphics.hpp>
+#include "Particle.hpp"
 #include <vector>
-#include "Object.hpp"
-#include "Math.hpp"
+#include <unordered_map>
+#include <array>
 #include <iostream>
-#include <cmath>
+
+constexpr int CELL_CAPACITY = 10;
 
 struct CollisionCell
 {
-	std::vector<Object> objects;
+	int numObjects = 0;
+	//Particle* objects[CELL_CAPACITY] = {};
+	std::array<Particle*, CELL_CAPACITY> objects = { nullptr };
+	//std::vector<Particle*> objects;
+
+	void addObject(Particle* object)
+	{
+		objects[numObjects] = object;
+		//objects.push_back(object);
+		numObjects = numObjects + 1 >= CELL_CAPACITY ? numObjects : numObjects + 1;
+	}
+
+	void clear()
+	{
+		//objects.clear();
+		numObjects = 0;
+	}
 };
 
 struct CollisionGrid
 {
-	// size of cell, used to calculate the number of rows and columns
-	float cellSize;
-	int numRows;
-	int numCols;
-	// basically a 2D array
-	std::vector<std::vector<CollisionCell>> cells;
+	int width, height, numRows, numCols, cellSize;
+	std::vector<sf::RectangleShape> rects;
+	std::vector<CollisionCell> grid;
 
-	CollisionGrid(sf::Vector2f size, float cellSize) :cellSize(cellSize)
+	CollisionGrid(int width, int height, int cellSize)
+		:width(width), height(height),
+		numRows(ceil((float)height / cellSize)), numCols(ceil((float)width / cellSize)), cellSize(cellSize)
 	{
-		numRows = ceil((float)size.y / cellSize);
-		numCols = ceil((float)size.x / cellSize);
-		std::cout << numRows << ", " << numCols << std::endl;
-		// resize to reserve space so we can use index to access
-		/*cells.resize(numRows);
-		for (int i = 0; i < numRows; i++)
+		//rects.resize(numRows * numCols);
+		grid.resize(numRows * numCols);
+
+		/*for (int row = 0; row < numRows; row++)
 		{
-			cells[i].resize(numCols);
+			for (int col = 0; col < numCols; col++)
+			{
+				int pos = row * numCols + col;
+				rects[pos].setPosition(col * cellSize, row * cellSize);
+				rects[pos].setSize({ (float)cellSize, (float)cellSize });
+				rects[pos].setOutlineThickness(0.5f);
+				rects[pos].setOutlineColor(sf::Color::Red);
+				rects[pos].setFillColor(sf::Color::Transparent);
+			}
 		}*/
-		clearGrid();
-	}
-
-	void addObject(const Object& object)
-	{
-		const sf::Vector2f position = object.currentPosition;
-		// find the corresponding row and column of the object
-		int row = int(position.y / cellSize);
-		int col = int(position.x / cellSize);
-		std::cout << row << ", " << col << std::endl;
-		cells[row][col].objects.push_back(object);
 	}
 
 	void clearGrid()
 	{
-		cells.clear();
-	}
-
-	void checkCellCollisions()
-	{
-		// we will check every neighbor so start from 1 to prevent out of bound
-		for (int row = 1; row < numRows - 1; row++)
+		for (CollisionCell& cell : grid)
 		{
-			for (int col = 1; col < numCols - 1; col++)
+			cell.clear();
+			/*for (int row = 0; row < numRows; row++)
 			{
-				// current cell
-				CollisionCell& currentCell = cells[row][col];
-
-				// check its neighbors
-				for (int i = -1; i <= 1; i++)
+				for (int col = 0; col < numCols; col++)
 				{
-					for (int j = -1; j <= 1; j++)
-					{
-						CollisionCell& neighborCell = cells[row + i][col + j];
-						solveCellCollision(currentCell, neighborCell);
-					}
+					int pos = row * numCols + col;
+					rects[pos].setOutlineColor(sf::Color::Red);
+					rects[pos].setFillColor(sf::Color::Transparent);
 				}
-			}
+			}*/
 		}
 	}
 
-	void solveCellCollision(CollisionCell& cell1, CollisionCell& cell2)
+	CollisionCell& getCell(int row, int col)
 	{
-		for (Object& object1 : cell1.objects)
-		{
-			for (Object& object2 : cell2.objects)
-			{
-				if (object1.id != object2.id)
-				{
-					solveObjectCollision(object1, object2);
-				}
-			}
-		}
+		int pos = row * numCols + col;
+		return grid[pos];
 	}
 
-	void solveObjectCollision(Object& object1, Object& object2)
+	sf::Vector2i getGridCoordinate(const sf::Vector2f& position, float radius)
 	{
-		// strength of bouncing response when colliding
-		constexpr float responseCoef = 0.75f;
+		float x = position.x < 0.0f ? 0.0f : position.x > width ? width : position.x;
+		float y = position.y < 0.0f ? 0.0f : position.y > height ? height : position.y;
+		int row = y / cellSize;
+		int col = x / cellSize;
+		row = row < 0 ? 0 : row >= numRows ? numRows - 1 : row;
+		col = col < 0 ? 0 : col >= numCols ? numCols - 1 : col;
+		return { row, col };
+	}
 
-		sf::Vector2f direction = object1.currentPosition - object2.currentPosition;
-		float distance = Math::getLength(direction);
-		// the min distance to not collide is the sum of radius
-		const float minDistance = object1.radius + object2.radius;
+	void addObject(Particle& object)
+	{
+		const sf::Vector2f position = object.currentPosition;
+		// top-left side of the object
+		const sf::Vector2f minPosition = position - sf::Vector2f(object.radius, object.radius);
+		// bottom-right side of the object
+		const sf::Vector2f maxPosition = position + sf::Vector2f(object.radius, object.radius);
 
-		if (distance < minDistance)
-		{
-			sf::Vector2f unit = direction / distance;
-			// use radius as ratio of bouncing
-			float total = object1.radius + object2.radius;
-			float ratio1 = object1.radius / total;
-			float ratio2 = object2.radius / total;
+		sf::Vector2i coord = getGridCoordinate(position, object.radius);
+		getCell(coord.x, coord.y).addObject(&object);
+		/*int pos = coord1.x * numCols + coord1.y;
+		rects[pos].setOutlineColor(sf::Color::Green);*/
 
-			// distance to push to separate two objects
-			// distance - minDistance = overlappinig distance between two objects
-			// times 0.5 because each objects only need to move away half of that distance
-			float delta = responseCoef * 0.5f * (distance - minDistance);
+		// to play it safe, add object to every cell that it might potentially touch
+		//sf::Vector2i coord2 = getGridCoordinate(minPosition, object.radius);
+		//getCell(coord2.x, coord2.y).addObject(&object);
+		//int pos2 = coord2.x * numCols + coord2.y;
+		////rects[pos2].setOutlineColor(sf::Color::Green);
 
-			object1.currentPosition -= unit * (ratio2 * delta);
-			object2.currentPosition += unit * (ratio1 * delta);
-		}
+		//sf::Vector2i coord3 = getGridCoordinate({ minPosition.x, maxPosition.y }, object.radius);
+		//getCell(coord3.x, coord3.y).addObject(&object);
+		//int pos3 = coord3.x * numCols + coord3.y;
+		////rects[pos3].setOutlineColor(sf::Color::Green);
+
+		//sf::Vector2i coord4 = getGridCoordinate({ maxPosition.x, maxPosition.y }, object.radius);
+		//getCell(coord4.x, coord4.y).addObject(&object);
+		//int pos4 = coord4.x * numCols + coord4.y;
+		////rects[pos4].setOutlineColor(sf::Color::Green);
+
+		//sf::Vector2i coord5 = getGridCoordinate({ minPosition.x, maxPosition.y }, object.radius);
+		//getCell(coord5.x, coord5.y).addObject(&object);
+		//int pos5 = coord5.x * numCols + coord5.y;
+		////rects[pos5].setOutlineColor(sf::Color::Green);
 	}
 };

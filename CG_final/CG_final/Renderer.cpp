@@ -34,6 +34,7 @@ void Renderer::render(RenderContext& context)
 	drawParticles(context, states);
 	// draw links
 	//drawLinks(context, states);
+	//drawGrid(context, states);
 }
 
 void Renderer::drawParticles(RenderContext& context, sf::RenderStates& states)
@@ -68,6 +69,15 @@ void Renderer::drawLinks(RenderContext& context, sf::RenderStates& states)
 		drawThickLine(linkVertices, link.p1->currentPosition, link.p2->currentPosition, width, sf::Color::Red);
 	}
 	context.draw(linkVertices, states);
+}
+
+void Renderer::drawGrid(RenderContext& context, sf::RenderStates& states)
+{
+	const CollisionGrid& grid = solver.getGrid();
+	for (sf::RectangleShape rect : grid.rects)
+	{
+		context.draw(rect, states);
+	}
 }
 
 // because SFML doesn't have line with width, draw a rectangle instead
