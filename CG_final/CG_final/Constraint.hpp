@@ -19,11 +19,11 @@ struct Constraint
 		float distance = Math::getLength(direction);
 		// if the distance between two particles is further than length, put them back
 		sf::Vector2f unit = direction / distance;
-		const float delta = length - distance;
+		const float delta = 0.5f * (length - distance);
 		// only update distance if particles are not pinned
 		if (!p1->pinned)
-			p1->currentPosition += 0.5f * delta * unit;
+			p1->move(unit * delta);
 		if (!p2->pinned)
-			p2->currentPosition -= 0.5f * delta * unit;
+			p2->move(-unit * delta);
 	}
 };

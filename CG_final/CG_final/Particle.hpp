@@ -28,7 +28,6 @@ struct Particle
 
 	void initVelocity(const sf::Vector2f& v, float dt)
 	{
-		//rb.velocity = v;
 		prevPosition = currentPosition - (v * dt);
 	}
 
@@ -50,7 +49,7 @@ struct Particle
 		prevPosition = currentPosition;
 		currentPosition = newPosition;
 		// update velocity
-		//rb.velocity = (currentPosition - prevPosition) / dt;
+		// velocity = (currentPosition - prevPosition) / dt;
 
 		// reset acceleration for next calculation
 		acceleration = { 0.0f, 0.0f };
@@ -61,5 +60,11 @@ struct Particle
 		// F = m * a -> a = F / m
 		sf::Vector2f a = force / mass;
 		acceleration += a;
+	}
+
+	void move(const sf::Vector2f& amount)
+	{
+		if (!pinned)
+			currentPosition += amount;
 	}
 };

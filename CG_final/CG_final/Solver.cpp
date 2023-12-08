@@ -224,8 +224,8 @@ void Solver::solveCollisions()
 				// times 0.5 because each particles only need to move away half of that distance
 				float delta = responseStrength * 0.5f * (minDistance - distance);
 
-				p1.currentPosition += unit * (ratio2 * delta);
-				p2.currentPosition -= unit * (ratio1 * delta);
+				p1.move(unit * (ratio2 * delta));
+				p2.move(-unit * (ratio1 * delta));
 			}
 		}
 	}
@@ -309,8 +309,8 @@ void Solver::solveParticleCollision(Particle* p1, Particle* p2)
 		// times 0.5 because each particles only need to move away half of that distance
 		float delta = responseCoef * 0.5f * (minDistance - distance);
 
-		p1->currentPosition += unit * (ratio2 * delta);
-		p2->currentPosition -= unit * (ratio1 * delta);
+		p1->move(unit * (ratio2 * delta));
+		p2->move(-unit * (ratio1 * delta));
 	}
 }
 
