@@ -8,6 +8,10 @@ Renderer::Renderer(Solver& solver) : solver(solver), worldBox(sf::Quads, 4)
 	texture.loadFromFile("assets/circle.png");
 	texture.generateMipmap();
 	//texture.setSmooth(true);
+	particleTexture.loadFromFile("assets/circle.png");
+	particleTexture.generateMipmap();
+	cubeTexture.loadFromFile("assets/cube.png");
+	cubeTexture.generateMipmap();
 }
 
 void Renderer::initWorldBox()
@@ -23,7 +27,7 @@ void Renderer::initWorldBox()
 	worldBox[3] = sf::Vertex({ 0.0f, worldInfo.y }, worldBoxColor, { 0.0f, textureSize.y });
 }
 
-void Renderer::render(RenderContext& context)
+void Renderer::render(RenderContext& context, const sf::Vector2f& mousePosition, int type)
 {
 	// render state to store transform and texture
 	sf::RenderStates states;
@@ -35,6 +39,7 @@ void Renderer::render(RenderContext& context)
 	// draw links
 	drawConstraints(context, states);
 	//drawGrid(context, states);
+	drawType(context, states, mousePosition, type);
 }
 
 void Renderer::drawParticles(RenderContext& context, sf::RenderStates& states)
@@ -78,6 +83,30 @@ void Renderer::drawGrid(RenderContext& context, sf::RenderStates& states)
 	{
 		context.draw(rect, states);
 	}
+}
+
+void Renderer::drawType(RenderContext& context, sf::RenderStates& states, const sf::Vector2f& position, int type)
+{
+	float offset = 0.0f;
+
+	if (type == 0)
+	{
+		states.texture = &particleTexture;
+		offset = 5.0f;
+	}
+	else
+	{
+		states.texture = &cubeTexture;
+		offset = 15.0f;
+	}
+
+	sf::VertexArray va(sf::Quads, 4);
+	const sf::Vector2f textureSize = (sf::Vector2f)states.texture->getSize();
+	va[0] = sf::Vertex({ position.x - offset, position.y - offset }, { 0.0f, 0.0f });
+	va[1] = sf::Vertex({ position.x - offset, position.y + offset }, { 0.0f, textureSize.y });
+	va[2] = sf::Vertex({ position.x + offset, position.y + offset }, { textureSize.x, textureSize.y });
+	va[3] = sf::Vertex({ position.x + offset, position.y - offset }, { textureSize.x, 0.0f });
+	context.draw(va, states);
 }
 
 // because SFML doesn't have line with width, draw a rectangle instead

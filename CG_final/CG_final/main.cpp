@@ -32,7 +32,7 @@ int main()
 	bool pinned = false; // pin objects or not
 	bool pause = false; // pause game or not
 
-	Game game(WINDOW_WIDTH, WINDOW_HEIGHT, "SFML Game", sf::Style::Default);
+	Game game(WINDOW_WIDTH, WINDOW_HEIGHT, "SFML Game", sf::Style::Fullscreen);
 	RenderContext& context = game.getRenderContext();
 
 	// settings
@@ -74,7 +74,6 @@ int main()
 		});
 	eventManager.addMousePressedCallback(sf::Mouse::Middle, [&](const sf::Event& event) {
 		buildMode = (buildMode + 1) % 2;
-		std::cout << "Current mode: " << buildMode << std::endl;
 		});
 	eventManager.addKeyPressedCallback(sf::Keyboard::P, [&](const sf::Event& event) {
 		pinned = !pinned;
@@ -87,13 +86,13 @@ int main()
 	{
 		game.handleEvents();
 
-		if (solver.getNumParticles() < MAX_NUM_OBJECTS && timer.getElapsedTime().asSeconds() >= OBJECT_SPAWN_DELAY) {
+		/*if (solver.getNumParticles() < MAX_NUM_OBJECTS && timer.getElapsedTime().asSeconds() >= OBJECT_SPAWN_DELAY) {
 			timer.restart();
 			civ::Ref<Particle> particle = solver.addParticle(SPAWN_LOCATION, OBJECT_RADIUS);
 			const float elapsedTime = solver.getElapsedTime();
 			const float angle = sin(elapsedTime) + Math::PI * 0.5f;
 			particle->initVelocity(OBJECT_SPPED * sf::Vector2f(cos(angle), sin(angle)), solver.getStepDt());
-		}
+		}*/
 
 		if (isBuilding && timer.getElapsedTime().asSeconds() >= 0.3f)
 		{
@@ -105,7 +104,7 @@ int main()
 				solver.addParticle(mousePosition, OBJECT_RADIUS, pinned);
 				break;
 			case 1:
-				solver.addCube(mousePosition, true, pinned);
+				solver.addCube(mousePosition, false, pinned);
 				break;
 			}
 		}
@@ -117,7 +116,7 @@ int main()
 			solver.update();
 
 		game.clear();
-		renderer.render(context);
+		renderer.render(context, game.getWorldMousePosition(), buildMode);
 		game.display();
 	}
 

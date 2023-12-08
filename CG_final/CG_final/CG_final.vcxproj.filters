@@ -67,5 +67,8 @@
     <Image Include="assets\circle.png">
       <Filter>資源檔</Filter>
     </Image>
+    <Image Include="assets\cube.png">
+      <Filter>資源檔</Filter>
+    </Image>
   </ItemGroup>
 </Project>
