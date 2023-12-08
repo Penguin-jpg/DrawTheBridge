@@ -23,10 +23,16 @@ public:
 	void addBasicEvents();
 
 	void click();
+	void drag();
 	void release();
+	void undrag();
 	const sf::Vector2f getScreenMousePosition();
 	const sf::Vector2f getWorldMousePosition();
 
+	// store position for some checkings
+	sf::Vector2f clickPosition;
+	sf::Vector2f dragPosition;
+	sf::Vector2f prevDragPosition;
 private:
 	int windowWidth;
 	int windowHeight;
@@ -34,4 +40,5 @@ private:
 	sf::RenderWindow window;
 	sfev::EventManager eventManager;
 	RenderContext context;
+
 };

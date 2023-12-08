@@ -10,7 +10,7 @@
 class Solver
 {
 public:
-	Solver(sf::Vector2f size, float margin, int cellSize);
+	Solver(sf::Vector2f size, float particleRadius, int cellSize);
 
 	void update();
 	void applyGravity();
@@ -23,11 +23,15 @@ public:
 	const civ::IndexVector<Particle>& getParticles();
 	const int getNumParticles();
 
-	civ::Ref<Constraint> addConstraint(civ::Ref<Particle> p1, civ::Ref<Particle> p2);
+	civ::Ref<Constraint> addConstraint(civ::Ref<Particle> p1, civ::Ref<Particle> p2, float distance = -1.0f);
 	const civ::IndexVector<Constraint>& getConstraints();
 	const int getNumLinks();
 
 	void addCube(const sf::Vector2f& position, bool soft = true, bool pinned = false);
+	void addChain(const sf::Vector2f& position, float chainLength);
+
+	// check if the position is valid for adding new object
+	bool isValidPosition(const sf::Vector2f& position);
 
 	const sf::Vector3f getWorld();
 	void solveCollisionWithWorld(Particle& particle);
@@ -55,9 +59,9 @@ private:
 	civ::IndexVector<Constraint> constraints;
 	// world box
 	sf::Vector2f worldSize;
+	float particleRadius = 1.0f;
 	// collision grid
 	CollisionGrid grid;
-	float margin = 1.0f;
 	// timer
 	float elapsedTime = 0.0f;
 	float frameDt = 0.0f;

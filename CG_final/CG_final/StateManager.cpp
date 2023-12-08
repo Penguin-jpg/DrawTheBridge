@@ -37,7 +37,7 @@ void StateManager::setZoom(float zoom)
 
 void StateManager::adjustOffset(const sf::Vector2f& amount)
 {
-	// need to consider zoom
+	// shift the focus of screen
 	state.offset += amount / state.zoom;
 	updateTransform();
 }
@@ -48,9 +48,20 @@ void StateManager::click(const sf::Vector2f& clickedMousePosition)
 	state.screenMousePosition = clickedMousePosition;
 }
 
+void StateManager::drag(const sf::Vector2f& draggingMousePosition)
+{
+	state.dragging = true;
+	state.screenMousePosition = draggingMousePosition;
+}
+
 void StateManager::release()
 {
 	state.clicked = false;
+}
+
+void StateManager::undrag()
+{
+	state.dragging = false;
 }
 
 bool StateManager::isClicked()
@@ -58,11 +69,16 @@ bool StateManager::isClicked()
 	return state.clicked;
 }
 
+bool StateManager::isDragging()
+{
+	return state.dragging;
+}
+
 void StateManager::updateMousePosition(const sf::Vector2f& newMousePosition)
 {
 	if (state.clicked)
 	{
-		// adjust offset so the click position will be correct
+		// adjust offset to move the screen focus
 		//adjustOffset(state.screenMousePosition - newMousePosition);
 	}
 

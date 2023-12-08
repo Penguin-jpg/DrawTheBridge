@@ -2,8 +2,8 @@
 #include "Math.hpp"
 #include <iostream>
 
-Solver::Solver(sf::Vector2f size, float margin, int cellSize)
-	:worldSize(size), margin(margin), grid(size.x, size.y, cellSize) {}
+Solver::Solver(sf::Vector2f size, float particleRadius, int cellSize)
+	:worldSize(size), particleRadius(particleRadius), grid(size.x, size.y, cellSize) {}
 
 void Solver::update()
 {
@@ -74,9 +74,13 @@ const int Solver::getNumParticles()
 	return particles.size();
 }
 
-civ::Ref<Constraint> Solver::addConstraint(civ::Ref<Particle> p1, civ::Ref<Particle> p2)
+civ::Ref<Constraint> Solver::addConstraint(civ::Ref<Particle> p1, civ::Ref<Particle> p2, float distance)
 {
-	civ::ID id = constraints.emplace_back(p1, p2, Math::getLength(p1->currentPosition - p2->currentPosition));
+	civ::ID id = 0;
+	if (distance < 0.0f)
+		id = constraints.emplace_back(p1, p2, Math::getLength(p1->currentPosition - p2->currentPosition));
+	else
+		id = constraints.emplace_back(p1, p2, distance);
 	return constraints.createRef(id);
 }
 
@@ -93,19 +97,20 @@ const int Solver::getNumLinks()
 void Solver::addCube(const sf::Vector2f& position, bool soft, bool pinned)
 {
 	// use offset so that cube will be drawn at exactly that position
-	float offset = 10.0f;
+	float offset = 2 * particleRadius;
 
-	// a cube is composed of 9 particles and 12 links
+	// a cube is composed of 9 particles and constraints at every edge and diagonal
 	// I use more particles in order to simulate more dynamic motion
-	civ::Ref<Particle> p1 = addParticle({ position.x - offset, position.y - offset }, 5.0f, pinned);
-	civ::Ref<Particle> p2 = addParticle({ position.x, position.y - offset }, 5.0f, pinned);
-	civ::Ref<Particle> p3 = addParticle({ position.x + offset, position.y - offset }, 5.0f, pinned);
-	civ::Ref<Particle> p4 = addParticle({ position.x - offset, position.y }, 5.0f, pinned);
-	civ::Ref<Particle> p5 = addParticle({ position.x , position.y }, 5.0f, pinned);
-	civ::Ref<Particle> p6 = addParticle({ position.x + offset, position.y }, 5.0f, pinned);
-	civ::Ref<Particle> p7 = addParticle({ position.x - offset, position.y + offset }, 5.0f, pinned);
-	civ::Ref<Particle> p8 = addParticle({ position.x, position.y + offset }, 5.0f, pinned);
-	civ::Ref<Particle> p9 = addParticle({ position.x + offset, position.y + offset }, 5.0f, pinned);
+	civ::Ref<Particle> p1 = addParticle({ position.x - offset, position.y - offset }, particleRadius, pinned);
+	civ::Ref<Particle> p2 = addParticle({ position.x, position.y - offset }, particleRadius, pinned);
+	civ::Ref<Particle> p3 = addParticle({ position.x + offset, position.y - offset }, particleRadius, pinned);
+	civ::Ref<Particle> p4 = addParticle({ position.x - offset, position.y }, particleRadius, pinned);
+	civ::Ref<Particle> p5 = addParticle({ position.x , position.y }, particleRadius, pinned);
+	civ::Ref<Particle> p6 = addParticle({ position.x + offset, position.y }, particleRadius, pinned);
+	civ::Ref<Particle> p7 = addParticle({ position.x - offset, position.y + offset }, particleRadius, pinned);
+	civ::Ref<Particle> p8 = addParticle({ position.x, position.y + offset }, particleRadius, pinned);
+	civ::Ref<Particle> p9 = addParticle({ position.x + offset, position.y + offset }, particleRadius, pinned);
+	// edges
 	addConstraint(p1, p2);
 	addConstraint(p2, p3);
 	addConstraint(p1, p4);
@@ -118,39 +123,72 @@ void Solver::addCube(const sf::Vector2f& position, bool soft, bool pinned)
 	addConstraint(p6, p9);
 	addConstraint(p7, p8);
 	addConstraint(p8, p9);
+	// main diagonal
+	addConstraint(p1, p5);
+	addConstraint(p2, p6);
+	addConstraint(p4, p8);
+	addConstraint(p5, p9);
+
 	// if this is not a soft box, add links for every diagonal to strengthen it
 	if (!soft)
 	{
-		addConstraint(p1, p5);
-		addConstraint(p5, p9);
 		addConstraint(p3, p5);
 		addConstraint(p5, p7);
 	}
 }
 
+void Solver::addChain(const sf::Vector2f& position, float chainLength)
+{
+	// calculate how much particles needed
+	int numParticles = chainLength / (2 * particleRadius);
+	float offset = 2 * particleRadius;
+	sf::Vector2f chainPosition(position.x - offset, position.y - offset);
+
+	std::vector<civ::Ref<Particle>> ps(numParticles);
+	// manually create the first one
+	ps[0] = addParticle(chainPosition, particleRadius, true);
+	// create rest ones along the y axis
+	for (int i = 1; i < numParticles; i++)
+	{
+		chainPosition += sf::Vector2f(0.0f, offset);
+		ps[i] = addParticle(chainPosition, particleRadius);
+	}
+	// add constraints
+	for (int i = 1; i < numParticles; i++)
+	{
+		addConstraint(ps[i - 1], ps[i]);
+	}
+}
+
+bool Solver::isValidPosition(const sf::Vector2f& position)
+{
+	sf::Vector2i coord = grid.getGridCoordinate(position, particleRadius);
+	return grid.getCell(coord.x, coord.y).numObjects == 0;
+}
+
 const sf::Vector3f Solver::getWorld()
 {
-	return { worldSize.x, worldSize.y, margin };
+	return { worldSize.x, worldSize.y, particleRadius };
 }
 
 void Solver::solveCollisionWithWorld(Particle& particle)
 {
 	// if particle out of world, put it back
-	if (particle.currentPosition.x > worldSize.x - margin)
+	if (particle.currentPosition.x > worldSize.x - particleRadius)
 	{
-		particle.currentPosition.x = worldSize.x - margin;
+		particle.currentPosition.x = worldSize.x - particleRadius;
 	}
-	else if (particle.currentPosition.x < margin)
+	else if (particle.currentPosition.x < particleRadius)
 	{
-		particle.currentPosition.x = margin;
+		particle.currentPosition.x = particleRadius;
 	}
-	if (particle.currentPosition.y > worldSize.y - margin)
+	if (particle.currentPosition.y > worldSize.y - particleRadius)
 	{
-		particle.currentPosition.y = worldSize.y - margin;
+		particle.currentPosition.y = worldSize.y - particleRadius;
 	}
-	else if (particle.currentPosition.y < margin)
+	else if (particle.currentPosition.y < particleRadius)
 	{
-		particle.currentPosition.y = margin;
+		particle.currentPosition.y = particleRadius;
 	}
 }
 

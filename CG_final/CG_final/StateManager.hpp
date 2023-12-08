@@ -18,6 +18,8 @@ struct State
 	sf::Vector2f worldMousePosition;
 	// is mouse clicked
 	bool clicked = false;
+	// is mouse dragging
+	bool dragging = false;
 
 	State(sf::Vector2f windowSize)
 		:center(windowSize.x * 0.5f, windowSize.y * 0.5f), offset(center) {}
@@ -39,8 +41,11 @@ public:
 
 	// mouse-related functions
 	void click(const sf::Vector2f& clickedMousePosition);
+	void drag(const sf::Vector2f& draggingMousePosition);
 	void release();
+	void undrag();
 	bool isClicked();
+	bool isDragging();
 	void updateMousePosition(const sf::Vector2f& newMousePosition);
 	const sf::Vector2f getScreenMousePosition();
 	const sf::Vector2f getWorldMousePosition();

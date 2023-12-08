@@ -57,6 +57,9 @@ void Game::addBasicEvents()
 	// update mouse position
 	eventManager.addEventCallback(sf::Event::MouseMoved, [&](const sf::Event& event) {
 		context.stateManager.updateMousePosition(eventManager.getFloatMousePosition());
+		clickPosition = getWorldMousePosition();
+		prevDragPosition = dragPosition;
+		dragPosition = getWorldMousePosition();
 		});
 }
 
@@ -65,9 +68,19 @@ void Game::click()
 	context.stateManager.click(eventManager.getFloatMousePosition());
 }
 
+void Game::drag()
+{
+	context.stateManager.drag(eventManager.getFloatMousePosition());
+}
+
 void Game::release()
 {
 	context.stateManager.release();
+}
+
+void Game::undrag()
+{
+	context.stateManager.undrag();
 }
 
 const sf::Vector2f Game::getScreenMousePosition()

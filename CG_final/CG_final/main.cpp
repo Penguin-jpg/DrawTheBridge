@@ -17,10 +17,10 @@ int main()
 	const int MAX_NUM_OBJECTS = 2000;
 	const float OBJECT_RADIUS = 5.0f;
 	const int CELL_SIZE = 2 * OBJECT_RADIUS;
-	const float WORLD_BOX_MARGIN = OBJECT_RADIUS;
 	const float OBJECT_MIN_RADIUS = 10.0f;
 	const float OBJECT_MAX_RADIUS = 20.0f;
-	const float OBJECT_SPAWN_DELAY = 0.025f;
+	//const float OBJECT_SPAWN_TIME = 0.07f;
+	const float OBJECT_SPAWN_TIME = 0.3f;
 	const float OBJECT_SPPED = 1200.0f;
 	const sf::Vector2f SPAWN_LOCATION = { 100.0f, 100.0f };
 	const sf::Vector2f WORLD_SIZE = { 300.0f, 300.0f };
@@ -30,6 +30,7 @@ int main()
 	bool isBuilding = false; // build or not
 	int buildMode = 0; // 0: particle, 1: cube
 	bool pinned = false; // pin objects or not
+	bool chaining = false; // chain the drawn particles together
 	bool pause = false; // pause game or not
 
 	Game game(WINDOW_WIDTH, WINDOW_HEIGHT, "SFML Game", sf::Style::Fullscreen);
@@ -42,10 +43,10 @@ int main()
 	context.setZoom(zoom);
 	context.setFocus({ WORLD_SIZE.x * 0.5f, WORLD_SIZE.y * 0.5f });
 
-	// timer for game
-	sf::Clock timer;
+	// timer to track spawning time
+	sf::Clock spawnTimer;
 
-	Solver solver(WORLD_SIZE, WORLD_BOX_MARGIN, CELL_SIZE);
+	Solver solver(WORLD_SIZE, OBJECT_RADIUS, CELL_SIZE);
 	Renderer renderer(solver);
 	RNG rng;
 
@@ -56,6 +57,7 @@ int main()
 	sfev::EventManager& eventManager = game.getEventManager();
 	eventManager.addMousePressedCallback(sf::Mouse::Left, [&](const sf::Event& event) {
 		game.click();
+		game.drag();
 		isBuilding = true;
 		/*const sf::Vector2f screenMousePosition = getScreenMousePosition();
 		const sf::Vector2f worldMousePosition = getWorldMousePosition();
@@ -64,6 +66,7 @@ int main()
 		});
 	eventManager.addMouseReleasedCallback(sf::Mouse::Left, [&](const sf::Event& event) {
 		game.release();
+		game.undrag();
 		isBuilding = false;
 		});
 	eventManager.addMousePressedCallback(sf::Mouse::Right, [&](const sf::Event& event) {
@@ -74,6 +77,10 @@ int main()
 		});
 	eventManager.addMousePressedCallback(sf::Mouse::Middle, [&](const sf::Event& event) {
 		buildMode = (buildMode + 1) % 2;
+		});
+	eventManager.addKeyPressedCallback(sf::Keyboard::C, [&](const sf::Event& event) {
+		chaining = !chaining;
+		std::cout << "is chaining: " << chaining << std::endl;
 		});
 	eventManager.addKeyPressedCallback(sf::Keyboard::P, [&](const sf::Event& event) {
 		pinned = !pinned;
@@ -86,7 +93,7 @@ int main()
 	{
 		game.handleEvents();
 
-		/*if (solver.getNumParticles() < MAX_NUM_OBJECTS && timer.getElapsedTime().asSeconds() >= OBJECT_SPAWN_DELAY) {
+		/*if (solver.getNumParticles() < MAX_NUM_OBJECTS && timer.getElapsedTime().asSeconds() >= OBJECT_SPAWN_TIME) {
 			timer.restart();
 			civ::Ref<Particle> particle = solver.addParticle(SPAWN_LOCATION, OBJECT_RADIUS);
 			const float elapsedTime = solver.getElapsedTime();
@@ -94,17 +101,27 @@ int main()
 			particle->initVelocity(OBJECT_SPPED * sf::Vector2f(cos(angle), sin(angle)), solver.getStepDt());
 		}*/
 
-		if (isBuilding && timer.getElapsedTime().asSeconds() >= 0.3f)
+		const sf::Vector2f mousePosition = game.getWorldMousePosition();
+		if (isBuilding && spawnTimer.getElapsedTime().asSeconds() >= OBJECT_SPAWN_TIME)
+			//if (isBuilding && solver.isValidPosition(mousePosition))
 		{
-			timer.restart();
-			const sf::Vector2f mousePosition = game.getWorldMousePosition();
+			spawnTimer.restart();
 			switch (buildMode)
 			{
 			case 0:
-				solver.addParticle(mousePosition, OBJECT_RADIUS, pinned);
+			{
+				if (!chaining)
+				{
+					civ::Ref<Particle> particle = solver.addParticle(mousePosition, OBJECT_RADIUS, pinned);
+				}
+				else
+				{
+					solver.addChain(mousePosition, 50.0f);
+				}
 				break;
+			}
 			case 1:
-				solver.addCube(mousePosition, false, pinned);
+				solver.addCube(mousePosition, !pinned, pinned);
 				break;
 			}
 		}
