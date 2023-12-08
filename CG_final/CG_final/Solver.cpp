@@ -94,7 +94,7 @@ const int Solver::getNumLinks()
 	return constraints.size();
 }
 
-void Solver::addCube(const sf::Vector2f& position, bool soft, bool pinned)
+void Solver::addCube(const sf::Vector2f& position, bool pinned)
 {
 	// use offset so that cube will be drawn at exactly that position
 	float offset = 2 * particleRadius;
@@ -128,13 +128,6 @@ void Solver::addCube(const sf::Vector2f& position, bool soft, bool pinned)
 	addConstraint(p2, p6);
 	addConstraint(p4, p8);
 	addConstraint(p5, p9);
-
-	// if this is not a soft box, add links for every diagonal to strengthen it
-	if (!soft)
-	{
-		addConstraint(p3, p5);
-		addConstraint(p5, p7);
-	}
 }
 
 void Solver::addChain(const sf::Vector2f& position, float chainLength)
@@ -150,7 +143,7 @@ void Solver::addChain(const sf::Vector2f& position, float chainLength)
 	// create rest ones along the y axis
 	for (int i = 1; i < numParticles; i++)
 	{
-		chainPosition += sf::Vector2f(0.0f, offset);
+		chainPosition += sf::Vector2f(5.0f, offset);
 		ps[i] = addParticle(chainPosition, particleRadius);
 	}
 	// add constraints
@@ -163,7 +156,15 @@ void Solver::addChain(const sf::Vector2f& position, float chainLength)
 bool Solver::isValidPosition(const sf::Vector2f& position)
 {
 	sf::Vector2i coord = grid.getGridCoordinate(position, particleRadius);
-	return grid.getCell(coord.x, coord.y).numObjects == 0;
+	CollisionCell& cell = grid.getCell(coord.x, coord.y);
+	for (int i = 0; i < cell.numObjects; i++)
+	{
+		if (Math::getDistance(position, cell.objects[i]->currentPosition) < 2 * particleRadius - 2.0f)
+		{
+			return false;
+		}
+	}
+	return true;
 }
 
 const sf::Vector3f Solver::getWorld()

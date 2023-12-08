@@ -20,7 +20,7 @@ int main()
 	const float OBJECT_MIN_RADIUS = 10.0f;
 	const float OBJECT_MAX_RADIUS = 20.0f;
 	//const float OBJECT_SPAWN_TIME = 0.07f;
-	const float OBJECT_SPAWN_TIME = 0.3f;
+	const float OBJECT_SPAWN_TIME = 0.15f;
 	const float OBJECT_SPPED = 1200.0f;
 	const sf::Vector2f SPAWN_LOCATION = { 100.0f, 100.0f };
 	const sf::Vector2f WORLD_SIZE = { 300.0f, 300.0f };
@@ -89,6 +89,7 @@ int main()
 		pause = !pause;
 		});
 
+
 	while (game.isRunning())
 	{
 		game.handleEvents();
@@ -102,8 +103,7 @@ int main()
 		}*/
 
 		const sf::Vector2f mousePosition = game.getWorldMousePosition();
-		if (isBuilding && spawnTimer.getElapsedTime().asSeconds() >= OBJECT_SPAWN_TIME)
-			//if (isBuilding && solver.isValidPosition(mousePosition))
+		if (isBuilding && spawnTimer.getElapsedTime().asSeconds() >= OBJECT_SPAWN_TIME && solver.isValidPosition(mousePosition))
 		{
 			spawnTimer.restart();
 			switch (buildMode)
@@ -121,7 +121,7 @@ int main()
 				break;
 			}
 			case 1:
-				solver.addCube(mousePosition, !pinned, pinned);
+				solver.addCube(mousePosition, pinned);
 				break;
 			}
 		}

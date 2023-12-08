@@ -27,7 +27,7 @@ public:
 	const civ::IndexVector<Constraint>& getConstraints();
 	const int getNumLinks();
 
-	void addCube(const sf::Vector2f& position, bool soft = true, bool pinned = false);
+	void addCube(const sf::Vector2f& position, bool pinned = false);
 	void addChain(const sf::Vector2f& position, float chainLength);
 
 	// check if the position is valid for adding new object
