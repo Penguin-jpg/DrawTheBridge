@@ -33,7 +33,7 @@ void Renderer::render(RenderContext& context)
 	// draw particles
 	drawParticles(context, states);
 	// draw links
-	//drawLinks(context, states);
+	drawConstraints(context, states);
 	//drawGrid(context, states);
 }
 
@@ -56,16 +56,16 @@ void Renderer::drawParticles(RenderContext& context, sf::RenderStates& states)
 	}
 }
 
-void Renderer::drawLinks(RenderContext& context, sf::RenderStates& states)
+void Renderer::drawConstraints(RenderContext& context, sf::RenderStates& states)
 {
 	// vertex array of links (draw with line)
-	const civ::IndexVector<Link>& links = solver.getLinks();
+	const civ::IndexVector<Constraint>& constraints = solver.getConstraints();
 	// width of line
 	const float width = 2.0f;
 	sf::VertexArray linkVertices(sf::Quads);
-	for (int i = 0; i < links.size(); i++)
+	for (int i = 0; i < constraints.size(); i++)
 	{
-		const Link& link = links[i];
+		const Constraint& link = constraints[i];
 		drawThickLine(linkVertices, link.p1->currentPosition, link.p2->currentPosition, width, sf::Color::Red);
 	}
 	context.draw(linkVertices, states);

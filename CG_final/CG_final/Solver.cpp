@@ -16,7 +16,7 @@ void Solver::update()
 		solveGridCollision();
 		//solveCollisions();
 		updateParticles(stepDt);
-		updateLinks(stepDt);
+		updateConstraints(stepDt);
 	}
 }
 
@@ -37,11 +37,11 @@ void Solver::updateParticles(float dt)
 	}
 }
 
-void Solver::updateLinks(float dt)
+void Solver::updateConstraints(float dt)
 {
-	for (Link& link : links)
+	for (Constraint& constraint : constraints)
 	{
-		link.update(dt);
+		constraint.update(dt);
 	}
 }
 
@@ -74,20 +74,20 @@ const int Solver::getNumParticles()
 	return particles.size();
 }
 
-civ::Ref<Link> Solver::addLink(civ::Ref<Particle> p1, civ::Ref<Particle> p2)
+civ::Ref<Constraint> Solver::addConstraint(civ::Ref<Particle> p1, civ::Ref<Particle> p2)
 {
-	civ::ID id = links.emplace_back(p1, p2, Math::getLength(p1->currentPosition - p2->currentPosition));
-	return links.createRef(id);
+	civ::ID id = constraints.emplace_back(p1, p2, Math::getLength(p1->currentPosition - p2->currentPosition));
+	return constraints.createRef(id);
 }
 
-const civ::IndexVector<Link>& Solver::getLinks()
+const civ::IndexVector<Constraint>& Solver::getConstraints()
 {
-	return links;
+	return constraints;
 }
 
 const int Solver::getNumLinks()
 {
-	return links.size();
+	return constraints.size();
 }
 
 void Solver::addCube(const sf::Vector2f& position, bool soft, bool pinned)
@@ -106,25 +106,25 @@ void Solver::addCube(const sf::Vector2f& position, bool soft, bool pinned)
 	civ::Ref<Particle> p7 = addParticle({ position.x - offset, position.y + offset }, 5.0f, pinned);
 	civ::Ref<Particle> p8 = addParticle({ position.x, position.y + offset }, 5.0f, pinned);
 	civ::Ref<Particle> p9 = addParticle({ position.x + offset, position.y + offset }, 5.0f, pinned);
-	addLink(p1, p2);
-	addLink(p2, p3);
-	addLink(p1, p4);
-	addLink(p2, p5);
-	addLink(p3, p6);
-	addLink(p4, p5);
-	addLink(p5, p6);
-	addLink(p4, p7);
-	addLink(p5, p8);
-	addLink(p6, p9);
-	addLink(p7, p8);
-	addLink(p8, p9);
+	addConstraint(p1, p2);
+	addConstraint(p2, p3);
+	addConstraint(p1, p4);
+	addConstraint(p2, p5);
+	addConstraint(p3, p6);
+	addConstraint(p4, p5);
+	addConstraint(p5, p6);
+	addConstraint(p4, p7);
+	addConstraint(p5, p8);
+	addConstraint(p6, p9);
+	addConstraint(p7, p8);
+	addConstraint(p8, p9);
 	// if this is not a soft box, add links for every diagonal to strengthen it
 	if (!soft)
 	{
-		addLink(p1, p5);
-		addLink(p5, p9);
-		addLink(p3, p5);
-		addLink(p5, p7);
+		addConstraint(p1, p5);
+		addConstraint(p5, p9);
+		addConstraint(p3, p5);
+		addConstraint(p5, p7);
 	}
 }
 

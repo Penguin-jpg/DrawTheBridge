@@ -89,7 +89,6 @@ int main()
 
 		if (solver.getNumParticles() < MAX_NUM_OBJECTS && timer.getElapsedTime().asSeconds() >= OBJECT_SPAWN_DELAY) {
 			timer.restart();
-			/*civ::Ref<Particle> particle = solver.addParticle(SPAWN_LOCATION, rng.sampleFromRange(OBJECT_MIN_RADIUS, OBJECT_MAX_RADIUS));*/
 			civ::Ref<Particle> particle = solver.addParticle(SPAWN_LOCATION, OBJECT_RADIUS);
 			const float elapsedTime = solver.getElapsedTime();
 			const float angle = sin(elapsedTime) + Math::PI * 0.5f;

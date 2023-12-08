@@ -3,10 +3,10 @@
 #include <vector>
 #include "ConstantIndexVector/index_vector.hpp"
 #include "Particle.hpp"
-#include "Link.hpp"
+#include "Constraint.hpp"
 #include "CollisionGrid.hpp"
 
-// this class is in charge of simulation
+// this class is in charge of physics
 class Solver
 {
 public:
@@ -15,7 +15,7 @@ public:
 	void update();
 	void applyGravity();
 	void updateParticles(float dt);
-	void updateLinks(float dt);
+	void updateConstraints(float dt);
 
 	void applyForce(float radius, const sf::Vector2f& position);
 
@@ -23,8 +23,8 @@ public:
 	const civ::IndexVector<Particle>& getParticles();
 	const int getNumParticles();
 
-	civ::Ref<Link> addLink(civ::Ref<Particle> p1, civ::Ref<Particle> p2);
-	const civ::IndexVector<Link>& getLinks();
+	civ::Ref<Constraint> addConstraint(civ::Ref<Particle> p1, civ::Ref<Particle> p2);
+	const civ::IndexVector<Constraint>& getConstraints();
 	const int getNumLinks();
 
 	void addCube(const sf::Vector2f& position, bool soft = true, bool pinned = false);
@@ -52,7 +52,7 @@ public:
 private:
 	sf::Vector2f gravity{ 0.0f, 1000.0f };
 	civ::IndexVector<Particle> particles;
-	civ::IndexVector<Link> links;
+	civ::IndexVector<Constraint> constraints;
 	// world box
 	sf::Vector2f worldSize;
 	// collision grid

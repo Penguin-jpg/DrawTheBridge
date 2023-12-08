@@ -3,13 +3,14 @@
 #include "Math.hpp"
 #include "ConstantIndexVector/index_vector.hpp"
 
-struct Link
+// constraint to hold two particles together
+struct Constraint
 {
 	civ::Ref<Particle> p1, p2;
-	// length of the link (also the max distance that two particles can separate)
+	// length of the constraint (also the max distance that two particles can separate)
 	float length;
 
-	Link(civ::Ref<Particle> p1, civ::Ref<Particle> p2, float length) :p1(p1), p2(p2), length(length) {}
+	Constraint(civ::Ref<Particle> p1, civ::Ref<Particle> p2, float length) :p1(p1), p2(p2), length(length) {}
 
 	void update(float dt)
 	{
