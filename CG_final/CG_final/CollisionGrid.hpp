@@ -79,7 +79,7 @@ struct CollisionGrid
 		return grid[pos];
 	}
 
-	sf::Vector2i getGridCoordinate(const sf::Vector2f& position, float radius)
+	sf::Vector2i getGridCoordinate(const sf::Vector2f& position, float radius) const
 	{
 		float x = position.x < 0.0f ? 0.0f : position.x > width ? width : position.x;
 		float y = position.y < 0.0f ? 0.0f : position.y > height ? height : position.y;

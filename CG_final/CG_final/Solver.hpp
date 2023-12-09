@@ -48,10 +48,7 @@ public:
 	void setSubSteps(const int _subSteps);
 	const float getStepDt();
 
-	const CollisionGrid& getGrid()
-	{
-		return grid;
-	}
+	const CollisionGrid& getGrid();
 
 private:
 	sf::Vector2f gravity{ 0.0f, 1000.0f };

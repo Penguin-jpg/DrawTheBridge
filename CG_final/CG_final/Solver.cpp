@@ -336,3 +336,8 @@ const float Solver::getStepDt()
 {
 	return stepDt;
 }
+
+const CollisionGrid& Solver::getGrid()
+{
+	return grid;
+}
