@@ -54,6 +54,8 @@ int main()
 	solver.setFrameDt(FRAMERATE);
 	solver.setSubSteps(NUM_SUB_STEPS);
 
+	std::vector<civ::Ref<Particle>> chainedParitlces;
+
 	// add additional events
 	sfev::EventManager& eventManager = game.getEventManager();
 	eventManager.addMousePressedCallback(sf::Mouse::Left, [&](const sf::Event& event) {
@@ -69,6 +71,14 @@ int main()
 		game.release();
 		game.undrag();
 		isBuilding = false;
+		if (chaining)
+		{
+			for (int i = 1; i < chainedParitlces.size(); i++)
+			{
+				solver.addConstraint(chainedParitlces[i - 1], chainedParitlces[i], 10.0f);
+			}
+			chainedParitlces.clear();
+		}
 		});
 	eventManager.addMousePressedCallback(sf::Mouse::Right, [&](const sf::Event& event) {
 		useForce = true;
@@ -95,14 +105,16 @@ int main()
 	{
 		game.handleEvents();
 
-		if (solver.getNumParticles() < MAX_NUM_OBJECTS && spawnTimer.getElapsedTime().asSeconds() >= OBJECT_SPAWN_TIME) {
-			spawnTimer.restart();
-			civ::Ref<Particle> particle = solver.addParticle(SPAWN_LOCATION, OBJECT_RADIUS);
-			const float elapsedTime = solver.getElapsedTime();
-			const float angle = sin(elapsedTime) + Math::PI * 0.5f;
-			//particle->initVelocity(OBJECT_SPPED * sf::Vector2f(cos(angle), sin(angle)), solver.getStepDt());
-			particle->initVelocity(OBJECT_SPPED * sf::Vector2f(1.0f, 0.0f), solver.getStepDt());
-		}
+		//if (solver.getNumParticles() < MAX_NUM_OBJECTS && spawnTimer.getElapsedTime().asSeconds() >= OBJECT_SPAWN_TIME) {
+		//	spawnTimer.restart();
+		//	civ::Ref<Particle> particle = solver.addParticle(SPAWN_LOCATION, OBJECT_RADIUS);
+		//	const float elapsedTime = solver.getElapsedTime();
+		//	const float angle = sin(elapsedTime) + Math::PI * 0.5f;
+		//	//particle->initVelocity(OBJECT_SPPED * sf::Vector2f(cos(angle), sin(angle)), solver.getStepDt());
+		//	particle->initVelocity(OBJECT_SPPED * sf::Vector2f(1.0f, 0.0f), solver.getStepDt());
+		//	if (chaining)
+		//		chainedParitlces.push_back(particle);
+		//}
 
 		const sf::Vector2f mousePosition = game.getWorldMousePosition();
 		if (isBuilding && spawnTimer.getElapsedTime().asSeconds() >= OBJECT_SPAWN_TIME)
@@ -112,19 +124,21 @@ int main()
 			{
 			case 0:
 			{
-				if (!chaining)
-				{
-					sf::Vector2f gridCoord = (sf::Vector2f)solver.getGrid().getGridCoordinate(mousePosition, OBJECT_RADIUS);
-					//civ::Ref<Particle> particle = solver.addParticle(mousePosition, OBJECT_RADIUS, pinned);
-					civ::Ref<Particle> particle = solver.addParticle(
-						{ gridCoord.y * CELL_SIZE, gridCoord.x * CELL_SIZE },
-						OBJECT_RADIUS, pinned
-					);
-				}
-				else
-				{
-					solver.addChain(mousePosition, 50.0f);
-				}
+				//if (!chaining)
+				//{
+				sf::Vector2f gridCoord = (sf::Vector2f)solver.getGrid().getGridCoordinate(mousePosition, OBJECT_RADIUS);
+				//civ::Ref<Particle> particle = solver.addParticle(mousePosition, OBJECT_RADIUS, pinned);
+				civ::Ref<Particle> particle = solver.addParticle(
+					{ gridCoord.y * CELL_SIZE, gridCoord.x * CELL_SIZE },
+					OBJECT_RADIUS, pinned
+				);
+				if (chaining)
+					chainedParitlces.push_back(particle);
+				//}
+				//else
+				//{
+				//	solver.addChain(mousePosition, 50.0f);
+				//}
 				break;
 			}
 			case 1:
