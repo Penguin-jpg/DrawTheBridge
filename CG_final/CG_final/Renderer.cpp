@@ -27,7 +27,7 @@ void Renderer::initWorldBox()
 	worldBox[3] = sf::Vertex({ 0.0f, worldInfo.y }, worldBoxColor, { 0.0f, textureSize.y });
 }
 
-void Renderer::render(RenderContext& context, const sf::Vector2f& mousePosition, int type)
+void Renderer::render(RenderContext& context, const sf::Vector2f& mousePosition, int type, bool showGrid)
 {
 	// render state to store transform and texture
 	sf::RenderStates states;
@@ -38,7 +38,10 @@ void Renderer::render(RenderContext& context, const sf::Vector2f& mousePosition,
 	drawParticles(context, states);
 	// draw links
 	drawConstraints(context, states);
-	//drawGrid(context, states);
+	// draw collision grid
+	if (showGrid)
+		drawGrid(context, states);
+	// draw object type
 	drawType(context, states, mousePosition, type);
 }
 
@@ -56,7 +59,6 @@ void Renderer::drawParticles(RenderContext& context, sf::RenderStates& states)
 	{
 		circle.setPosition(particle.currentPosition);
 		circle.setScale(particle.radius, particle.radius);
-		//circle.setFillColor(sf::Color::Green);
 		context.draw(circle, states);
 	}
 }
@@ -78,10 +80,28 @@ void Renderer::drawConstraints(RenderContext& context, sf::RenderStates& states)
 
 void Renderer::drawGrid(RenderContext& context, sf::RenderStates& states)
 {
-	const CollisionGrid& grid = solver.getGrid();
-	for (sf::RectangleShape rect : grid.rects)
+	CollisionGrid& grid = solver.getGrid();
+	int cellSize = grid.cellSize;
+	// draw a rectangle to represent a cell
+	sf::RectangleShape rect({ (float)cellSize, (float)cellSize });
+	rect.setFillColor(sf::Color::Transparent);
+	rect.setOutlineThickness(0.3f);
+	for (int row = 0; row < grid.numRows; row++)
 	{
-		context.draw(rect, states);
+		for (int col = 0; col < grid.numCols; col++)
+		{
+			rect.setPosition(col * cellSize, row * cellSize);
+			// if there are objects inside the cell, turn its outline color to green
+			if (grid.getCell(row, col).numObjects > 0)
+			{
+				rect.setOutlineColor(sf::Color::Green);
+			}
+			else
+			{
+				rect.setOutlineColor(sf::Color::Red);
+			}
+			context.draw(rect, states);
+		}
 	}
 }
 

@@ -10,7 +10,7 @@ public:
 
 	void initWorldBox();
 
-	void render(RenderContext& context, const sf::Vector2f& mousePosition, int type);
+	void render(RenderContext& context, const sf::Vector2f& mousePosition, int type, bool showGrid);
 
 	void drawParticles(RenderContext& context, sf::RenderStates& states);
 	void drawConstraints(RenderContext& context, sf::RenderStates& states);

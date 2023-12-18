@@ -32,28 +32,13 @@ struct CollisionCell
 struct CollisionGrid
 {
 	int width, height, numRows, numCols, cellSize;
-	std::vector<sf::RectangleShape> rects;
 	std::vector<CollisionCell> grid;
 
 	CollisionGrid(int width, int height, int cellSize)
 		:width(width), height(height),
 		numRows(ceil((float)height / cellSize)), numCols(ceil((float)width / cellSize)), cellSize(cellSize)
 	{
-		//rects.resize(numRows * numCols);
 		grid.resize(numRows * numCols);
-
-		/*for (int row = 0; row < numRows; row++)
-		{
-			for (int col = 0; col < numCols; col++)
-			{
-				int pos = row * numCols + col;
-				rects[pos].setPosition(col * cellSize, row * cellSize);
-				rects[pos].setSize({ (float)cellSize, (float)cellSize });
-				rects[pos].setOutlineThickness(0.5f);
-				rects[pos].setOutlineColor(sf::Color::Red);
-				rects[pos].setFillColor(sf::Color::Transparent);
-			}
-		}*/
 	}
 
 	void clearGrid()
@@ -61,15 +46,6 @@ struct CollisionGrid
 		for (CollisionCell& cell : grid)
 		{
 			cell.clear();
-			/*for (int row = 0; row < numRows; row++)
-			{
-				for (int col = 0; col < numCols; col++)
-				{
-					int pos = row * numCols + col;
-					rects[pos].setOutlineColor(sf::Color::Red);
-					rects[pos].setFillColor(sf::Color::Transparent);
-				}
-			}*/
 		}
 	}
 

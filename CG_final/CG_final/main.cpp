@@ -19,9 +19,9 @@ int main()
 	const int CELL_SIZE = 2 * OBJECT_RADIUS;
 	const float OBJECT_MIN_RADIUS = 10.0f;
 	const float OBJECT_MAX_RADIUS = 20.0f;
-	//const float OBJECT_SPAWN_TIME = 0.07f;
+	const float OBJECT_SPAWN_TIME = 0.07f;
 	//const float OBJECT_SPAWN_TIME = 0.15f;
-	const float OBJECT_SPAWN_TIME = 0.025f;
+	//const float OBJECT_SPAWN_TIME = 0.025f;
 	const float OBJECT_SPPED = 500.0f;
 	const sf::Vector2f WORLD_SIZE = { 500.0f, 300.0f };
 	const sf::Vector2f SPAWN_LOCATION = { OBJECT_RADIUS, OBJECT_RADIUS + 3.0f };
@@ -32,6 +32,7 @@ int main()
 	int buildMode = 0; // 0: particle, 1: cube
 	bool pinned = false; // pin objects or not
 	bool chaining = false; // chain the drawn particles together
+	bool showGrid = false; // show collision grid or not
 	bool pause = false; // pause game or not
 
 	Game game(WINDOW_WIDTH, WINDOW_HEIGHT, "SFML Game", sf::Style::Fullscreen);
@@ -96,6 +97,9 @@ int main()
 	eventManager.addKeyPressedCallback(sf::Keyboard::P, [&](const sf::Event& event) {
 		pinned = !pinned;
 		});
+	eventManager.addKeyPressedCallback(sf::Keyboard::G, [&](const sf::Event& event) {
+		showGrid = !showGrid;
+		});
 	eventManager.addKeyPressedCallback(sf::Keyboard::Space, [&](const sf::Event& event) {
 		pause = !pause;
 		});
@@ -119,7 +123,7 @@ int main()
 		const sf::Vector2f mousePosition = game.getWorldMousePosition();
 		if (isBuilding && spawnTimer.getElapsedTime().asSeconds() >= OBJECT_SPAWN_TIME)
 		{
-			spawnTimer.restart();
+			spawnTimer.restart();;
 			switch (buildMode)
 			{
 			case 0:
@@ -154,7 +158,7 @@ int main()
 			solver.update();
 
 		game.clear();
-		renderer.render(context, game.getWorldMousePosition(), buildMode);
+		renderer.render(context, game.getWorldMousePosition(), buildMode, showGrid);
 		game.display();
 	}
 

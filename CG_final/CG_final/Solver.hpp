@@ -36,6 +36,7 @@ public:
 	const sf::Vector3f getWorld();
 	void solveCollisionWithWorld(Particle& particle);
 
+	CollisionGrid& getGrid();
 	void fillCollisionGrid();
 	void solveCollisions();
 	void solveGridCollision();
@@ -48,7 +49,6 @@ public:
 	void setSubSteps(const int _subSteps);
 	const float getStepDt();
 
-	const CollisionGrid& getGrid();
 
 private:
 	sf::Vector2f gravity{ 0.0f, 1000.0f };

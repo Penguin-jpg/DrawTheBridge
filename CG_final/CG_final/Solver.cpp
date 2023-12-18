@@ -232,6 +232,11 @@ void Solver::solveCollisions()
 	}
 }
 
+CollisionGrid& Solver::getGrid()
+{
+	return grid;
+}
+
 void Solver::fillCollisionGrid()
 {
 	// initialize the grid
@@ -335,9 +340,4 @@ void Solver::setSubSteps(const int _subSteps)
 const float Solver::getStepDt()
 {
 	return stepDt;
-}
-
-const CollisionGrid& Solver::getGrid()
-{
-	return grid;
 }
