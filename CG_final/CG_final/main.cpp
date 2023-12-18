@@ -19,7 +19,7 @@ int main()
 	const int CELL_SIZE = 2 * OBJECT_RADIUS;
 	const float OBJECT_MIN_RADIUS = 10.0f;
 	const float OBJECT_MAX_RADIUS = 20.0f;
-	const float OBJECT_SPAWN_TIME = 0.07f;
+	const float OBJECT_SPAWN_TIME = 0.1f;
 	//const float OBJECT_SPAWN_TIME = 0.15f;
 	//const float OBJECT_SPAWN_TIME = 0.025f;
 	const float OBJECT_SPPED = 500.0f;
@@ -63,10 +63,6 @@ int main()
 		game.click();
 		game.drag();
 		isBuilding = true;
-		/*const sf::Vector2f screenMousePosition = getScreenMousePosition();
-		const sf::Vector2f worldMousePosition = getWorldMousePosition();
-		std::cout << "screen mouse: (" << screenMousePosition.x << ", " << screenMousePosition.y << ")\n";
-		std::cout << "world mouse: (" << worldMousePosition.x << ", " << worldMousePosition.y << ")\n";*/
 		});
 	eventManager.addMouseReleasedCallback(sf::Mouse::Left, [&](const sf::Event& event) {
 		game.release();
@@ -92,7 +88,6 @@ int main()
 		});
 	eventManager.addKeyPressedCallback(sf::Keyboard::C, [&](const sf::Event& event) {
 		chaining = !chaining;
-		std::cout << "is chaining: " << chaining << std::endl;
 		});
 	eventManager.addKeyPressedCallback(sf::Keyboard::P, [&](const sf::Event& event) {
 		pinned = !pinned;
@@ -131,11 +126,8 @@ int main()
 				//if (!chaining)
 				//{
 				sf::Vector2f gridCoord = (sf::Vector2f)solver.getGrid().getGridCoordinate(mousePosition, OBJECT_RADIUS);
-				//civ::Ref<Particle> particle = solver.addParticle(mousePosition, OBJECT_RADIUS, pinned);
-				civ::Ref<Particle> particle = solver.addParticle(
-					{ gridCoord.y * CELL_SIZE, gridCoord.x * CELL_SIZE },
-					OBJECT_RADIUS, pinned
-				);
+				sf::Vector2f objectPosition(gridCoord.y * CELL_SIZE + OBJECT_RADIUS, gridCoord.x * CELL_SIZE + OBJECT_RADIUS);
+				civ::Ref<Particle> particle = solver.addParticle(objectPosition, OBJECT_RADIUS, pinned);
 				if (chaining)
 					chainedParitlces.push_back(particle);
 				//}

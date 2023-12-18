@@ -20,8 +20,6 @@ public:
 	void drawThickLine(sf::VertexArray& va, const sf::Vector2f& start, const sf::Vector2f& end, float width, sf::Color color);
 
 private:
-	// target for rendering
-	//sf::RenderTarget& target;
 	// physics solver
 	Solver& solver;
 	// vertex array of world box (draw with triangle strip)

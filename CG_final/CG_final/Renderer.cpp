@@ -72,8 +72,8 @@ void Renderer::drawConstraints(RenderContext& context, sf::RenderStates& states)
 	sf::VertexArray linkVertices(sf::Quads);
 	for (int i = 0; i < constraints.size(); i++)
 	{
-		const Constraint& link = constraints[i];
-		drawThickLine(linkVertices, link.p1->currentPosition, link.p2->currentPosition, width, sf::Color::Red);
+		const Constraint& constraint = constraints[i];
+		drawThickLine(linkVertices, constraint.p1->currentPosition, constraint.p2->currentPosition, width, sf::Color::Red);
 	}
 	context.draw(linkVertices, states);
 }
