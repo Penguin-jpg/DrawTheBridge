@@ -61,6 +61,7 @@ void Solver::applyForce(float radius, const sf::Vector2f& position)
 civ::Ref<Particle> Solver::addParticle(const sf::Vector2f& position, float radius, bool pinned)
 {
 	civ::ID id = particles.emplace_back(position, radius, pinned);
+	particles[id].id = id;
 	return particles.createRef(id);
 }
 
@@ -72,6 +73,19 @@ const civ::IndexVector<Particle>& Solver::getParticles()
 const int Solver::getNumParticles()
 {
 	return particles.size();
+}
+
+civ::Ref<Particle> Solver::getClickedParticle(const sf::Vector2f& clickedPosition)
+{
+	for (Particle& particle : particles)
+	{
+		if (Math::getDistance(particle.currentPosition, clickedPosition) <= particle.radius)
+		{
+			return particles.createRef(particle.id);
+		}
+	}
+	// if none of particles are near, return empty Ref
+	return civ::Ref<Particle>();
 }
 
 civ::Ref<Constraint> Solver::addConstraint(civ::Ref<Particle> p1, civ::Ref<Particle> p2, float distance)

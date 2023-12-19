@@ -22,6 +22,7 @@ public:
 	civ::Ref<Particle> addParticle(const sf::Vector2f& position, float radius, bool pinned = false);
 	const civ::IndexVector<Particle>& getParticles();
 	const int getNumParticles();
+	civ::Ref<Particle> getClickedParticle(const sf::Vector2f& clickedPosition);
 
 	civ::Ref<Constraint> addConstraint(civ::Ref<Particle> p1, civ::Ref<Particle> p2, float distance = -1.0f);
 	const civ::IndexVector<Constraint>& getConstraints();

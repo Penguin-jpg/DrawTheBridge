@@ -8,13 +8,24 @@ struct Constraint
 {
 	civ::Ref<Particle> p1, p2;
 	// length of the constraint (also the max distance that two particles can separate)
-	float length;
+	float length = 1.0f;
 
+	Constraint() = default;
 	Constraint(civ::Ref<Particle> p1, civ::Ref<Particle> p2, float length)
 		:p1(p1), p2(p2), length(length) {}
 
+
+	bool isValid()
+	{
+		// constraint is only valid when two particle pointers are not nullptr
+		return p1 && p2;
+	}
+
 	void update(float dt)
 	{
+		if (!isValid())
+			return;
+
 		sf::Vector2f direction = p1->currentPosition - p2->currentPosition;
 		float distance = Math::getLength(direction);
 		// if the distance between two particles is further than length, put them back

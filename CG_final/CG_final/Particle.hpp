@@ -1,13 +1,12 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-
-static int objectCounter = 0;
+#include "ConstantIndexVector/index_vector.hpp"
 
 // basic object
 struct Particle
 {
 	// use an id to identify an object
-	int id = 0;
+	civ::ID id = 0;
 	sf::Vector2f currentPosition;
 	sf::Vector2f prevPosition;
 	float mass = 1.0f;
@@ -20,11 +19,7 @@ struct Particle
 	Particle() = default;
 
 	Particle(sf::Vector2f position, float radius, bool pinned = false)
-		:currentPosition(position), prevPosition(position), radius(radius), pinned(pinned)
-	{
-		id = objectCounter;
-		objectCounter++;
-	}
+		:currentPosition(position), prevPosition(position), radius(radius), pinned(pinned) {}
 
 	void initVelocity(const sf::Vector2f& v, float dt)
 	{
