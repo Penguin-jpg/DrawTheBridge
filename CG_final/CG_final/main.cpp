@@ -33,6 +33,7 @@ int main()
 	bool pinned = false; // pin objects or not
 	bool chaining = false; // chain the drawn particles together
 	bool showGrid = false; // show collision grid or not
+	bool useWind = false; // use wind or not
 	bool pause = false; // pause game or not
 
 	Game game(WINDOW_WIDTH, WINDOW_HEIGHT, "SFML Game", sf::Style::Fullscreen);
@@ -59,6 +60,9 @@ int main()
 	std::vector<civ::Ref<Particle>> connected(2);
 	int counter = 0;
 	civ::ID lastClicked = 0;
+
+	// winds (there can be multiple winds)
+	solver.addWind({ 0.0f, 0.0f }, { 100.0f, WORLD_SIZE.y }, 10.0f, 500.0f);
 
 	// add additional events
 	sfev::EventManager& eventManager = game.getEventManager();
@@ -125,6 +129,9 @@ int main()
 	eventManager.addKeyPressedCallback(sf::Keyboard::G, [&](const sf::Event& event) {
 		showGrid = !showGrid;
 		});
+	eventManager.addKeyPressedCallback(sf::Keyboard::W, [&](const sf::Event& event) {
+		useWind = !useWind;
+		});
 	eventManager.addKeyPressedCallback(sf::Keyboard::Space, [&](const sf::Event& event) {
 		pause = !pause;
 		});
@@ -164,6 +171,9 @@ int main()
 				break;
 			}
 		}
+
+		if (useWind)
+			solver.applyWind();
 
 		if (useForce)
 			solver.applyForce(150.0f, game.getWorldMousePosition());

@@ -9,7 +9,7 @@ void Solver::update()
 {
 	elapsedTime += frameDt;
 
-	for (int i = 0; i < subSteps; i++)
+	for (int i = 0; i < numSubSteps; i++)
 	{
 		applyGravity();
 		fillCollisionGrid();
@@ -25,6 +25,21 @@ void Solver::applyGravity()
 	for (Particle& particle : particles)
 	{
 		particle.applyForce(gravity);
+	}
+}
+
+void Solver::applyWind()
+{
+	for (Wind& wind : winds)
+	{
+		for (Particle& particle : particles)
+		{
+			wind.apply(worldSize.x);
+			if (wind.insideWind(particle))
+			{
+				particle.applyForce({ wind.strength , 0.0f });
+			}
+		}
 	}
 }
 
@@ -107,6 +122,18 @@ const int Solver::getNumLinks()
 {
 	return constraints.size();
 }
+
+civ::Ref<Wind> Solver::addWind(const sf::Vector2f& position, const sf::Vector2f& size, float speed, float strength)
+{
+	civ::ID id = winds.emplace_back(position, size, speed, strength);
+	return winds.createRef(id);
+}
+
+const civ::IndexVector<Wind>& Solver::getWinds()
+{
+	return winds;
+}
+
 
 void Solver::addCube(const sf::Vector2f& position, bool pinned)
 {
@@ -344,11 +371,11 @@ void Solver::setFrameDt(const int framerate)
 	frameDt = 1.0 / (float)framerate;
 }
 
-void Solver::setSubSteps(const int _subSteps)
+void Solver::setSubSteps(const int subSteps)
 {
-	subSteps = _subSteps;
+	numSubSteps = subSteps;
 	// calculate time for each sub-step
-	stepDt = frameDt / (float)subSteps;
+	stepDt = frameDt / (float)numSubSteps;
 }
 
 const float Solver::getStepDt()

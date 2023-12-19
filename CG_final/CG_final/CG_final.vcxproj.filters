@@ -62,6 +62,9 @@
     <ClInclude Include="CollisionGrid.hpp">
       <Filter>標頭檔</Filter>
     </ClInclude>
+    <ClInclude Include="Wind.hpp">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\circle.png">

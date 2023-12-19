@@ -15,7 +15,6 @@ public:
 	void drawParticles(RenderContext& context, sf::RenderStates& states);
 	void drawConstraints(RenderContext& context, sf::RenderStates& states);
 	void drawGrid(RenderContext& context, sf::RenderStates& states);
-
 	void drawType(RenderContext& context, sf::RenderStates& states, const sf::Vector2f& position, int type);
 	void drawThickLine(sf::VertexArray& va, const sf::Vector2f& start, const sf::Vector2f& end, float width, sf::Color color);
 
