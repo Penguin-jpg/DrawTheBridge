@@ -109,15 +109,15 @@ void Renderer::drawType(RenderContext& context, sf::RenderStates& states, const 
 {
 	float offset = 0.0f;
 
-	if (type == 0)
-	{
-		states.texture = &particleTexture;
-		offset = 5.0f;
-	}
-	else
+	if (type == 1)
 	{
 		states.texture = &cubeTexture;
 		offset = 15.0f;
+	}
+	else
+	{
+		states.texture = &particleTexture;
+		offset = 5.0f;
 	}
 
 	sf::VertexArray va(sf::Quads, 4);

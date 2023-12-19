@@ -34,6 +34,7 @@ int main()
 	bool chaining = false; // chain the drawn particles together
 	bool showGrid = false; // show collision grid or not
 	bool useWind = false; // use wind or not
+	bool grabbing = false; // grab clicked object
 	bool pause = false; // pause game or not
 
 	Game game(WINDOW_WIDTH, WINDOW_HEIGHT, "SFML Game", sf::Style::Fullscreen);
@@ -118,7 +119,7 @@ int main()
 		useForce = false;
 		});
 	eventManager.addMousePressedCallback(sf::Mouse::Middle, [&](const sf::Event& event) {
-		buildMode = (buildMode + 1) % 2;
+		buildMode = (buildMode + 1) % 3;
 		});
 	eventManager.addKeyPressedCallback(sf::Keyboard::C, [&](const sf::Event& event) {
 		chaining = !chaining;
@@ -132,10 +133,12 @@ int main()
 	eventManager.addKeyPressedCallback(sf::Keyboard::W, [&](const sf::Event& event) {
 		useWind = !useWind;
 		});
+	eventManager.addKeyPressedCallback(sf::Keyboard::X, [&](const sf::Event& event) {
+		grabbing = !grabbing;
+		});
 	eventManager.addKeyPressedCallback(sf::Keyboard::Space, [&](const sf::Event& event) {
 		pause = !pause;
 		});
-
 
 	while (game.isRunning())
 	{
@@ -143,7 +146,7 @@ int main()
 
 		//if (solver.getNumParticles() < MAX_NUM_OBJECTS && spawnTimer.getElapsedTime().asSeconds() >= OBJECT_SPAWN_TIME) {
 		//	spawnTimer.restart();
-		//	civ::Ref<Particle> particle = solver.addParticle(SPAWN_LOCATION, OBJECT_RADIUS);
+		//	civ::Ref<Particle> particle = solver.addParticle(SPAWN_LOCATION);
 		//	const float elapsedTime = solver.getElapsedTime();
 		//	const float angle = sin(elapsedTime) + Math::PI * 0.5f;
 		//	particle->initVelocity(OBJECT_SPPED * sf::Vector2f(1.0f, 0.0f), solver.getStepDt());
@@ -152,7 +155,7 @@ int main()
 		//}
 
 		const sf::Vector2f mousePosition = game.getWorldMousePosition();
-		if (!chaining && isBuilding && spawnTimer.getElapsedTime().asSeconds() >= OBJECT_SPAWN_TIME)
+		if (!chaining && !grabbing && isBuilding && spawnTimer.getElapsedTime().asSeconds() >= OBJECT_SPAWN_TIME)
 		{
 			spawnTimer.restart();;
 			switch (buildMode)
@@ -161,7 +164,7 @@ int main()
 			{
 				sf::Vector2f gridCoord = (sf::Vector2f)solver.getGrid().getGridCoordinate(mousePosition, OBJECT_RADIUS);
 				sf::Vector2f objectPosition(gridCoord.y * CELL_SIZE + OBJECT_RADIUS, gridCoord.x * CELL_SIZE + OBJECT_RADIUS);
-				civ::Ref<Particle> particle = solver.addParticle(objectPosition, OBJECT_RADIUS, pinned);
+				civ::Ref<Particle> particle = solver.addParticle(objectPosition, pinned);
 				if (chaining)
 					chainedParitlces.push_back(particle);
 				break;
@@ -169,6 +172,20 @@ int main()
 			case 1:
 				solver.addCube(mousePosition, pinned);
 				break;
+			case 2:
+				solver.addCircle(mousePosition, 50.0f, 30);
+			}
+		}
+
+		if (grabbing)
+		{
+			civ::Ref<Particle> grabbed = solver.getClickedParticle(mousePosition);
+			if (grabbed)
+			{
+				sf::Vector2f direction = game.getScreenMousePosition() - grabbed->currentPosition;
+				float distance = Math::getLength(direction);
+				sf::Vector2f unit = direction / distance;
+				grabbed->move(unit);
 			}
 		}
 

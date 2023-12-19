@@ -20,7 +20,7 @@ public:
 	void updateConstraints(float dt);
 
 	// creation and getters
-	civ::Ref<Particle> addParticle(const sf::Vector2f& position, float radius, bool pinned = false);
+	civ::Ref<Particle> addParticle(const sf::Vector2f& position, bool pinned = false);
 	const civ::IndexVector<Particle>& getParticles();
 	const int getNumParticles();
 
@@ -51,6 +51,7 @@ public:
 	civ::Ref<Particle> getClickedParticle(const sf::Vector2f& clickedPosition);
 	void addCube(const sf::Vector2f& position, bool pinned = false);
 	void addChain(const sf::Vector2f& position, float chainLength);
+	void addCircle(const sf::Vector2f& poisition, float radius, int numParticles);
 
 	// timing functions
 	const float getElapsedTime();

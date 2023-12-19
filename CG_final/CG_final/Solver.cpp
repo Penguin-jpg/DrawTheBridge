@@ -73,9 +73,9 @@ void Solver::applyForce(float radius, const sf::Vector2f& position)
 	}
 }
 
-civ::Ref<Particle> Solver::addParticle(const sf::Vector2f& position, float radius, bool pinned)
+civ::Ref<Particle> Solver::addParticle(const sf::Vector2f& position, bool pinned)
 {
-	civ::ID id = particles.emplace_back(position, radius, pinned);
+	civ::ID id = particles.emplace_back(position, particleRadius, pinned);
 	particles[id].id = id;
 	return particles.createRef(id);
 }
@@ -142,15 +142,15 @@ void Solver::addCube(const sf::Vector2f& position, bool pinned)
 
 	// a cube is composed of 9 particles and constraints at every edge and diagonal
 	// I use more particles in order to simulate more dynamic motion
-	civ::Ref<Particle> p1 = addParticle({ position.x - offset, position.y - offset }, particleRadius, pinned);
-	civ::Ref<Particle> p2 = addParticle({ position.x, position.y - offset }, particleRadius, pinned);
-	civ::Ref<Particle> p3 = addParticle({ position.x + offset, position.y - offset }, particleRadius, pinned);
-	civ::Ref<Particle> p4 = addParticle({ position.x - offset, position.y }, particleRadius, pinned);
-	civ::Ref<Particle> p5 = addParticle({ position.x , position.y }, particleRadius, pinned);
-	civ::Ref<Particle> p6 = addParticle({ position.x + offset, position.y }, particleRadius, pinned);
-	civ::Ref<Particle> p7 = addParticle({ position.x - offset, position.y + offset }, particleRadius, pinned);
-	civ::Ref<Particle> p8 = addParticle({ position.x, position.y + offset }, particleRadius, pinned);
-	civ::Ref<Particle> p9 = addParticle({ position.x + offset, position.y + offset }, particleRadius, pinned);
+	civ::Ref<Particle> p1 = addParticle({ position.x - offset, position.y - offset }, pinned);
+	civ::Ref<Particle> p2 = addParticle({ position.x, position.y - offset }, pinned);
+	civ::Ref<Particle> p3 = addParticle({ position.x + offset, position.y - offset }, pinned);
+	civ::Ref<Particle> p4 = addParticle({ position.x - offset, position.y }, pinned);
+	civ::Ref<Particle> p5 = addParticle({ position.x , position.y }, pinned);
+	civ::Ref<Particle> p6 = addParticle({ position.x + offset, position.y }, pinned);
+	civ::Ref<Particle> p7 = addParticle({ position.x - offset, position.y + offset }, pinned);
+	civ::Ref<Particle> p8 = addParticle({ position.x, position.y + offset }, pinned);
+	civ::Ref<Particle> p9 = addParticle({ position.x + offset, position.y + offset }, pinned);
 	// edges
 	addConstraint(p1, p2);
 	addConstraint(p2, p3);
@@ -180,17 +180,30 @@ void Solver::addChain(const sf::Vector2f& position, float chainLength)
 
 	std::vector<civ::Ref<Particle>> ps(numParticles);
 	// manually create the first one
-	ps[0] = addParticle(chainPosition, particleRadius, true);
+	ps[0] = addParticle(chainPosition, true);
 	// create rest ones along the y axis
 	for (int i = 1; i < numParticles; i++)
 	{
 		chainPosition += sf::Vector2f(5.0f, offset);
-		ps[i] = addParticle(chainPosition, particleRadius);
+		ps[i] = addParticle(chainPosition);
 	}
 	// add constraints
 	for (int i = 1; i < numParticles; i++)
 	{
 		addConstraint(ps[i - 1], ps[i]);
+	}
+}
+
+void Solver::addCircle(const sf::Vector2f& position, float radius, int numParticles)
+{
+	// small angle for every particle (2 * pi / numParticles)
+	float delta = 2.0f * Math::PI / float(numParticles);
+
+	for (int i = 0; i < numParticles; i++)
+	{
+		float x = radius * std::cos(i * delta);
+		float y = radius * std::sin(i * delta);
+		addParticle({ position.x + x, position.y + y }, true);
 	}
 }
 
