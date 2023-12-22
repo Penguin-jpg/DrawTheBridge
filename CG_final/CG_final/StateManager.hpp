@@ -37,7 +37,6 @@ public:
 	// set the focus location of camera
 	void setFocus(const sf::Vector2f& focus);
 	void setZoom(float zoom);
-	void adjustOffset(const sf::Vector2f& amount);
 
 	// mouse-related functions
 	void click(const sf::Vector2f& clickedMousePosition);

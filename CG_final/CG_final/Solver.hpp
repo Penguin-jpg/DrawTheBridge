@@ -49,6 +49,7 @@ public:
 	// utility functions
 	bool isValidPosition(const sf::Vector2f& position);
 	civ::Ref<Particle> getClickedParticle(const sf::Vector2f& clickedPosition);
+	civ::Ref<Particle> getNearestParticle(const sf::Vector2f& position);
 	void addCube(const sf::Vector2f& position, float stiffness = 1.0f, bool pinned = false);
 	void addChain(const sf::Vector2f& position, float chainLength);
 	void addCircle(const sf::Vector2f& poisition, float radius, int numParticles, float stiffness = 1.0f, bool pinCenter = false, bool pinOuter = false);

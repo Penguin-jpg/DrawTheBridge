@@ -179,13 +179,16 @@ int main()
 
 		if (grabbing)
 		{
-			civ::Ref<Particle> grabbed = solver.getClickedParticle(mousePosition);
+			civ::Ref<Particle> grabbed = solver.getNearestParticle(mousePosition);
 			if (grabbed)
 			{
-				sf::Vector2f direction = game.getScreenMousePosition() - grabbed->currentPosition;
+				sf::Vector2f direction = mousePosition - grabbed->currentPosition;
 				float distance = Math::getLength(direction);
-				sf::Vector2f unit = direction / distance;
-				grabbed->move(unit);
+				if (distance > 0.3f)
+				{
+					sf::Vector2f unit = direction / distance;
+					grabbed->move(unit);
+				}
 			}
 		}
 

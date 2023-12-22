@@ -35,13 +35,6 @@ void StateManager::setZoom(float zoom)
 	updateTransform();
 }
 
-void StateManager::adjustOffset(const sf::Vector2f& amount)
-{
-	// shift the focus of screen
-	state.offset += amount / state.zoom;
-	updateTransform();
-}
-
 void StateManager::click(const sf::Vector2f& clickedMousePosition)
 {
 	state.clicked = true;
@@ -76,12 +69,6 @@ bool StateManager::isDragging()
 
 void StateManager::updateMousePosition(const sf::Vector2f& newMousePosition)
 {
-	if (state.clicked)
-	{
-		// adjust offset to move the screen focus
-		//adjustOffset(state.screenMousePosition - newMousePosition);
-	}
-
 	state.screenMousePosition = newMousePosition;
 	// since the position on the screen is not the real world position, we need to use inverse
 	// transform to take it back to world coordinate

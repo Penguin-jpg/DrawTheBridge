@@ -103,6 +103,22 @@ civ::Ref<Particle> Solver::getClickedParticle(const sf::Vector2f& clickedPositio
 	return civ::Ref<Particle>();
 }
 
+civ::Ref<Particle> Solver::getNearestParticle(const sf::Vector2f& position)
+{
+	float minDistance = 9999.9f;
+	civ::Ref<Particle> nearest;
+	for (Particle& particle : particles)
+	{
+		float distance = Math::getDistance(particle.currentPosition, position);
+		if (distance < minDistance)
+		{
+			minDistance = distance;
+			nearest = particles.createRef(particle.id);
+		}
+	}
+	return nearest;
+}
+
 civ::Ref<Constraint> Solver::addConstraint(civ::Ref<Particle> p1, civ::Ref<Particle> p2, float distance, float strength)
 {
 	civ::ID id = 0;
