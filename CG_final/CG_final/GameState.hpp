@@ -1,0 +1,164 @@
+#pragma once
+#include <SFML/Graphics.hpp>
+#include <iostream>
+#include "Item.hpp"
+#include <vector>
+
+enum class StateID {
+    StartMenu,
+    LevelSelection,
+    Level1,
+    Level2,
+    Level3,
+    Refresh,
+    LevelGamePlay
+};
+
+class GameState {
+public:
+    std::vector<StateID> levelStates = { StateID::Level1, StateID::Level2, StateID::Level3 };
+    virtual bool handleInput(sf::RenderWindow& window, sf::Vector2i mousePos, StateID& currentStateID) = 0;
+    virtual void update(sf::Time dt) = 0;
+    virtual void render(sf::RenderWindow& window) = 0;
+    virtual void btnIsHovered(sf::RenderWindow& window, sf::Vector2i mousePos) = 0;
+    virtual void flgIsPressed(bool chaining, bool pinned, bool showGrid, bool useWind, bool grabbing, bool pause) = 0;
+    virtual void btnSetColor(Item& item, sf::Vector2i mousePos) {
+        if (item.mSprite.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+            item.mSprite.setColor(sf::Color(150, 150, 150));
+        }
+        else {
+            item.mSprite.setColor(sf::Color(255, 255, 255));
+        }
+    };
+    virtual void flgSetColor(Item& item, bool isPressed)
+    {
+        if (isPressed) {
+            item.mSprite.setColor(sf::Color(255, 255, 255));
+
+        }
+        else {
+            item.mSprite.setColor(sf::Color(150, 150, 150));
+        }
+    }
+    virtual ~GameState() {}
+};
+
+class StartMenuState : public GameState {
+    Item startButton;
+    Item background;
+    Item logo;
+
+public:
+
+    StartMenuState();
+    StartMenuState(sf::RenderWindow& window);
+
+    bool handleInput(sf::RenderWindow& window, sf::Vector2i mousePos, StateID& currentStateID) override;
+    void btnIsHovered(sf::RenderWindow& window, sf::Vector2i mousePos) override;
+    void update(sf::Time dt) override;
+    void render(sf::RenderWindow& window) override;
+    void flgIsPressed(bool chaining, bool pinned, bool showGrid, bool useWind, bool grabbing, bool pause) {
+
+    }
+};
+
+class LevelSelectionState : public GameState {
+
+public:
+    Item startButton;
+    Item background;
+    Item titleBtn;
+    Item backBtn;
+    
+    const int numberOfLevels = 3;
+    std::vector<Item> levelButton;
+
+
+
+    LevelSelectionState();
+    
+    LevelSelectionState(sf::RenderWindow& window);
+
+    bool handleInput(sf::RenderWindow& window, sf::Vector2i mousePos, StateID& currentStateID) override;
+
+    void btnIsHovered(sf::RenderWindow& window, sf::Vector2i mousePos) override;
+    void update(sf::Time dt) override;
+    void render(sf::RenderWindow& window) override;
+    void flgIsPressed(bool chaining, bool pinned, bool showGrid, bool useWind, bool grabbing, bool pause) {
+
+    }
+};
+
+
+class LevelGameState : public GameState {
+
+public:
+    Item background;
+    Item backBtn;
+    Item destinationFlag;
+    Item refreshBtn;
+    Item chainingFlg;
+    Item pinnedFlg;
+    Item showGridFlg;
+    Item windFlg;
+    Item grabbingFlg;
+    Item pauseFlg;
+    Item playBtn;
+    Item pauseBtn;
+
+    LevelGameState() : background("assets/UI/background2.jpg"), destinationFlag("assets/UI/red-flag.png"), chainingFlg("assets/UI/chaining.png"), pinnedFlg("assets/UI/pinned.png"), showGridFlg("assets/UI/show_grid.png"), windFlg("assets/UI/wind.png"), grabbingFlg("assets/UI/grabbing.png"), pauseFlg("assets/UI/pause.png"), playBtn("assets/UI/play.png"), pauseBtn("assets/UI/pause-button.png"){
+
+    }
+
+    LevelGameState(sf::RenderWindow& window);
+
+    bool handleInput(sf::RenderWindow& window, sf::Vector2i mousePos, StateID& currentStateID) override;
+
+    void btnIsHovered(sf::RenderWindow& window, sf::Vector2i mousePos) override;
+    void flgIsPressed(bool chaining, bool pinned, bool showGrid, bool useWind, bool grabbing, bool pause) override;
+    void update(sf::Time dt) override;
+    void render(sf::RenderWindow& window) override;
+
+};
+
+class Level1 : public LevelGameState {
+
+public:
+
+    Level1() {
+
+    }
+
+    Level1(sf::RenderWindow& window);
+
+    //void render(sf::RenderWindow& window) override;
+};
+
+class Level2 : public LevelGameState {
+
+public:
+    Item obstacle1;
+    Item obstacle2;
+    
+
+    Level2() {
+
+    }
+
+    Level2(sf::RenderWindow& window);
+
+    //void render(sf::RenderWindow& window) override;
+};
+
+class Level3 : public LevelGameState {
+
+public:
+
+    Level3() {
+
+    }
+
+    Level3(sf::RenderWindow& window);
+
+   // void render(sf::RenderWindow& window) override;
+};

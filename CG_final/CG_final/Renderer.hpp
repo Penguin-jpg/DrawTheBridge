@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include "Solver.hpp"
 #include "RenderContext.hpp"
+#include "Particle.hpp"
 
 class Renderer
 {
@@ -19,6 +20,7 @@ public:
 	void drawThickLine(sf::VertexArray& va, const sf::Vector2f& start, const sf::Vector2f& end, float width, sf::Color color);
 
 private:
+	int numOfTexture;
 	// physics solver
 	Solver& solver;
 	// vertex array of world box (draw with triangle strip)
@@ -28,4 +30,6 @@ private:
 	// current type of object to build
 	sf::Texture particleTexture;
 	sf::Texture cubeTexture;
+	std::vector<sf::Texture> circleTexture;
+	std::unordered_map<ParticleColor, sf::Texture*> textureMap;
 };

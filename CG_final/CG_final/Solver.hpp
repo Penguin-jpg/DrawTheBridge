@@ -54,12 +54,19 @@ public:
 	void addChain(const sf::Vector2f& position, float chainLength);
 	void addCircle(const sf::Vector2f& poisition, float radius, int numParticles, float stiffness = 1.0f, bool pinCenter = false, bool pinOuter = false);
 
+	//std::pair<int, int> addCircle(const sf::Vector2f& poisition, float radius, int numParticles, ParticleColor color, float stiffness = 1.0f, bool pinCenter = true, bool pinOuter = true);
+
+	std::pair<int, int> addRectangle(const sf::Vector2f& position, bool pinned, int width, int height, float particleRadius, ParticleColor color);
+	// std::pair<int, int> addCircle(const sf::Vector2f& position, float radius, int numParticles);
+	std::pair<int, int> addCircle(const sf::Vector2f& position, float radius, int numParticles, ParticleColor color);
+	void updateObstacle(int moveHorizontal, int& isForwrd, std::pair<int, int> particleRange, std::pair<int, int> horizontalRange, std::pair<int, int> verticalRange, float movingSpeed, sf::Time dt);
 	// timing functions
 	const float getElapsedTime();
 	void setFrameDt(const int framerate);
 	void setSubSteps(const int subSteps);
 	const float getStepDt();
 
+	void removeAllParticles();
 
 private:
 	sf::Vector2f gravity{ 0.0f, 1000.0f };

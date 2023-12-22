@@ -33,6 +33,12 @@
     <ClCompile Include="include\SelbaWard\Spline.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
+    <ClCompile Include="GameState.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="Item.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Solver.hpp">
@@ -66,6 +72,15 @@
       <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="Wind.hpp">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="GameState.hpp">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="Item.hpp">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="Obstacle.hpp">
       <Filter>標頭檔</Filter>
     </ClInclude>
   </ItemGroup>

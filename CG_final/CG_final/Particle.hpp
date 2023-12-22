@@ -2,6 +2,25 @@
 #include <SFML/Graphics.hpp>
 #include "ConstantIndexVector/index_vector.hpp"
 
+enum class ParticleColor {
+	Deg1,
+	Deg2,
+	Deg3,
+	Deg4,
+	Deg5,
+	Deg6,
+	Deg7,
+	Deg8,
+	Deg9,
+	Deg10,
+	Deg11,
+	Deg12,
+	Deg13,
+	Deg14,
+	Deg15,
+	Deg16,
+};
+
 // basic object
 struct Particle
 {
@@ -16,10 +35,11 @@ struct Particle
 	// whether the particle can move or not
 	bool pinned = false;
 
+	ParticleColor color;
 	Particle() = default;
 
 	Particle(sf::Vector2f position, float radius, bool pinned = false)
-		:currentPosition(position), prevPosition(position), radius(radius), pinned(pinned) {}
+		:currentPosition(position), prevPosition(position), radius(radius), pinned(pinned), color(ParticleColor::Deg5) {}
 
 	void initVelocity(const sf::Vector2f& v, float dt)
 	{

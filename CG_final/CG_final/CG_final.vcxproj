@@ -144,7 +144,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GameState.cpp" />
     <ClCompile Include="include\SelbaWard\Spline.cpp" />
+    <ClCompile Include="Item.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Solver.cpp" />
@@ -154,6 +156,9 @@
     <ClInclude Include="CollisionGrid.hpp" />
     <ClInclude Include="Game.hpp" />
     <ClInclude Include="Constraint.hpp" />
+    <ClInclude Include="GameState.hpp" />
+    <ClInclude Include="Item.hpp" />
+    <ClInclude Include="Obstacle.hpp" />
     <ClInclude Include="Random.hpp" />
     <ClInclude Include="RenderContext.hpp" />
     <ClInclude Include="Math.hpp" />

@@ -228,7 +228,7 @@ void Solver::addCircle(const sf::Vector2f& position, float radius, int numPartic
 		// add constraint to center
 		addConstraint(particle, center, -1.0f, stiffness);
 	}
-
+	
 	// connect every outer particle with their adjacent particles
 	for (int i = 0; i < numParticles; i++)
 	{
@@ -239,6 +239,170 @@ void Solver::addCircle(const sf::Vector2f& position, float radius, int numPartic
 		addConstraint(outerParticles[i], outerParticles[adjacent], -1.0f, stiffness);
 		addConstraint(outerParticles[i], outerParticles[far], -1.0f, stiffness);
 	}
+	
+}
+
+/*
+std::pair<int, int> Solver::addCircle(const sf::Vector2f& position, float radius, int numParticles, ParticleColor color, float stiffness, bool pinCenter, bool pinOuter)
+{
+	int startIndex = particles.size();
+	// small angle for every particle (2 * pi / numParticles)
+	float delta = 2.0f * Math::PI / float(numParticles);
+	// center of circle
+	civ::Ref<Particle> center = addParticle(position, pinCenter);
+	particles[particles.size() - 1].color = color;
+	// store outer particles
+	std::vector<civ::Ref<Particle>> outerParticles(numParticles);
+
+	for (int i = 0; i < numParticles; i++)
+	{
+		float x = radius * std::cos(i * delta);
+		float y = radius * std::sin(i * delta);
+		civ::Ref<Particle> particle = addParticle({ position.x + x, position.y + y }, pinOuter);
+		particles[particles.size() - 1].color = color;
+		outerParticles[i] = particle;
+		// add constraint to center
+		addConstraint(particle, center, -1.0f, stiffness);
+	}
+	int endIndex = particles.size() - 1;
+	
+	// connect every outer particle with their adjacent particles
+	for (int i = 0; i < numParticles; i++)
+	{
+		// connect adjacent and a further particle to make sure the structure is strong
+		// reference: https://github.com/subprotocol/verlet-js/blob/master/lib/objects.js#L102
+		int adjacent = (i + 1) % numParticles;
+		int far = (i + 5) % numParticles;
+		addConstraint(outerParticles[i], outerParticles[adjacent], -1.0f, stiffness);
+		addConstraint(outerParticles[i], outerParticles[far], -1.0f, stiffness);
+	}
+	return std::make_pair(startIndex, endIndex);
+}
+*/
+
+std::pair<int, int> Solver::addRectangle(const sf::Vector2f& position, bool pinned, int width, int height, float specParticleRadius, ParticleColor color)
+{
+	int startIndex = particles.size();
+	float offset = 2 * specParticleRadius;
+	// Iterate over each row
+	for (int i = 0; i < height; ++i) {
+		// Iterate over each column
+		for (int j = 0; j < width; ++j) {
+			// Calculate the position for each particle
+			float x = position.x + j * offset - (width / 2.0f - 0.5f) * offset;
+			float y = position.y + i * offset - (height / 2.0f - 0.5f) * offset;
+
+			// Add particle at calculated position
+			civ::Ref<Particle> p = addParticle({ x, y }, pinned);
+			//particles[particles.size() - 1].renderColor = sf::Color(255, 255, 255);
+			particles[particles.size() - 1].color = color;
+		}
+	}
+	int endIndex = particles.size() - 1;
+	return std::make_pair(startIndex, endIndex);
+}
+
+
+
+std::pair<int, int> Solver::addCircle(const sf::Vector2f& position, float radius, int numParticles, ParticleColor color)
+{
+	int startIndex = particles.size();
+	// small angle for every particle (2 * pi / numParticles)
+	float delta = 2.0f * Math::PI / float(numParticles);
+
+	for (int i = 0; i < numParticles; i++)
+	{
+		float x = radius * std::cos(i * delta);
+		float y = radius * std::sin(i * delta);
+		addParticle({ position.x + x, position.y + y }, true);
+		particles[particles.size() - 1].color = color;
+	}
+	int endIndex = particles.size() - 1;
+	return std::make_pair(startIndex, endIndex);
+}
+
+
+void Solver::removeAllParticles()
+{
+	particles.getData().clear();
+	constraints.getData().clear();
+}
+
+void Solver::updateObstacle(int moveHorizontal, int& isForwrd, std::pair<int, int> particleRange, std::pair<int, int> horizontalRange, std::pair<int, int> verticalRange, float movingSpeed, sf::Time dt)
+{
+	int minIndex, maxIndex;
+	int minPos, maxPos;
+
+	int startIndex = particleRange.first, endIndex = particleRange.second;
+	if (moveHorizontal) {
+		// std::cout << "start : " << startIndex << " end : " << endIndex << std::endl;
+		minIndex = startIndex, maxIndex = startIndex;
+		minPos = particles[startIndex].currentPosition.x, maxPos = particles[startIndex].currentPosition.x;
+
+		for (int i = startIndex + 1; i <= endIndex; i++) {
+
+			if (particles[i].currentPosition.x < minPos) {
+				minIndex = i;
+				minPos = particles[i].currentPosition.x;
+			} // if
+			else if (particles[i].currentPosition.x > maxPos) {
+				maxIndex = i;
+				maxPos = particles[i].currentPosition.x;
+			} // if
+
+		}
+
+		// std::cout << "minIndex : " << minIndex << "  " << minPos << " ,maxIndex : " << maxIndex << "  " << maxPos << std::endl;
+	}
+	else {
+		minIndex = startIndex, maxIndex = startIndex;
+		minPos = particles[startIndex].currentPosition.y, maxPos = particles[startIndex].currentPosition.y;
+
+		for (int i = startIndex + 1; i <= endIndex; i++) {
+
+			if (particles[i].currentPosition.x < minPos) {
+				minIndex = i;
+				minPos = particles[i].currentPosition.y;
+			} // if
+			if (particles[i].currentPosition.x > maxPos) {
+				maxIndex = i;
+				maxPos = particles[i].currentPosition.y;
+			} // if
+
+		}
+
+	}
+
+
+	// float speed = 100.0f; // Speed in units per second
+	if (isForwrd && (moveHorizontal && maxPos >= horizontalRange.second) || (!moveHorizontal && maxPos >= verticalRange.second)) {
+		isForwrd = 0;
+	}
+	else if (!isForwrd && (moveHorizontal && minPos <= horizontalRange.first) || (!moveHorizontal && minPos <= verticalRange.first)) {
+		isForwrd = 1;
+	}
+
+	if (isForwrd && moveHorizontal) {
+		for (int i = startIndex; i <= endIndex; i++) {
+			particles[i].currentPosition.x += dt.asSeconds() * movingSpeed;
+		}
+	}
+	else if (isForwrd && !moveHorizontal) {
+		for (int i = startIndex; i <= endIndex; i++) {
+			particles[i].currentPosition.y += dt.asSeconds() * movingSpeed;
+		}
+	}
+	else if (!isForwrd && moveHorizontal) {
+		for (int i = startIndex; i <= endIndex; i++) {
+			particles[i].currentPosition.x -= dt.asSeconds() * movingSpeed;
+		}
+	}
+	else if (!isForwrd && !moveHorizontal) {
+		for (int i = startIndex; i <= endIndex; i++) {
+			particles[i].currentPosition.y -= dt.asSeconds() * movingSpeed;
+		}
+	}
+
 }
 
 bool Solver::isValidPosition(const sf::Vector2f& position)

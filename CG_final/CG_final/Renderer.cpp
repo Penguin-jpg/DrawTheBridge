@@ -1,6 +1,6 @@
 #include "Renderer.hpp"
 
-Renderer::Renderer(Solver& solver) : solver(solver), worldBox(sf::Quads, 4)
+Renderer::Renderer(Solver& solver) : solver(solver), worldBox(sf::Quads, 4), numOfTexture(16), circleTexture(numOfTexture)
 {
 	initWorldBox();
 
@@ -12,6 +12,32 @@ Renderer::Renderer(Solver& solver) : solver(solver), worldBox(sf::Quads, 4)
 	particleTexture.generateMipmap();
 	cubeTexture.loadFromFile("assets/cube.png");
 	cubeTexture.generateMipmap();
+	std::string texturePath = "assets/CircleColor/Circ_Deg";
+
+	for (int i = 0; i < numOfTexture; i++) {
+
+		circleTexture[i].loadFromFile(texturePath + std::to_string(i + 1) + ".png");
+		circleTexture[i].generateMipmap();
+	}
+
+
+
+	textureMap[ParticleColor::Deg1] = &circleTexture[0];
+	textureMap[ParticleColor::Deg2] = &circleTexture[1];
+	textureMap[ParticleColor::Deg3] = &circleTexture[2];
+	textureMap[ParticleColor::Deg4] = &circleTexture[3];
+	textureMap[ParticleColor::Deg5] = &circleTexture[4];
+	textureMap[ParticleColor::Deg6] = &circleTexture[5];
+	textureMap[ParticleColor::Deg7] = &circleTexture[6];
+	textureMap[ParticleColor::Deg8] = &circleTexture[7];
+	textureMap[ParticleColor::Deg9] = &circleTexture[8];
+	textureMap[ParticleColor::Deg10] = &circleTexture[9];
+	textureMap[ParticleColor::Deg11] = &circleTexture[10];
+	textureMap[ParticleColor::Deg12] = &circleTexture[11];
+	textureMap[ParticleColor::Deg13] = &circleTexture[12];
+	textureMap[ParticleColor::Deg14] = &circleTexture[13];
+	textureMap[ParticleColor::Deg15] = &circleTexture[14];
+	textureMap[ParticleColor::Deg16] = &circleTexture[15];
 }
 
 void Renderer::initWorldBox()
@@ -33,7 +59,7 @@ void Renderer::render(RenderContext& context, const sf::Vector2f& mousePosition,
 	sf::RenderStates states;
 
 	// draw world box
-	context.draw(worldBox, states);
+	// context.draw(worldBox, states);
 	// draw particles
 	drawParticles(context, states);
 	// draw links
@@ -53,12 +79,20 @@ void Renderer::drawParticles(RenderContext& context, sf::RenderStates& states)
 	//circle.setPointCount(32);
 	circle.setOrigin(1.0f, 1.0f);
 	circle.setTextureRect({ 0, 0, textureSize.x, textureSize.y });
-	circle.setTexture(&texture);
+	// circle.setTexture(&texture);
 	const civ::IndexVector<Particle>& particles = solver.getParticles();
 	for (const Particle& particle : particles)
 	{
 		circle.setPosition(particle.currentPosition);
 		circle.setScale(particle.radius, particle.radius);
+
+		auto it = textureMap.find(particle.color);
+		if (it != textureMap.end()) {
+			circle.setTexture(it->second);
+		}
+		else { // Handle the case where the texture is not found
+			circle.setTexture(textureMap[ParticleColor::Deg5]);
+		}
 		context.draw(circle, states);
 	}
 }
