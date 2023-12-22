@@ -173,7 +173,7 @@ int main()
 				solver.addCube(mousePosition, pinned);
 				break;
 			case 2:
-				solver.addCircle(mousePosition, 50.0f, 30);
+				solver.addCircle(mousePosition, 50.0f, 15);
 			}
 		}
 

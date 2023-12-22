@@ -51,7 +51,7 @@ public:
 	civ::Ref<Particle> getClickedParticle(const sf::Vector2f& clickedPosition);
 	void addCube(const sf::Vector2f& position, bool pinned = false);
 	void addChain(const sf::Vector2f& position, float chainLength);
-	void addCircle(const sf::Vector2f& poisition, float radius, int numParticles);
+	void addCircle(const sf::Vector2f& poisition, float radius, int numParticles, bool pinCenter = false, bool pinOuter = false);
 
 	// timing functions
 	const float getElapsedTime();

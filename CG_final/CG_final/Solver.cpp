@@ -194,16 +194,34 @@ void Solver::addChain(const sf::Vector2f& position, float chainLength)
 	}
 }
 
-void Solver::addCircle(const sf::Vector2f& position, float radius, int numParticles)
+void Solver::addCircle(const sf::Vector2f& position, float radius, int numParticles, bool pinCenter, bool pinOuter)
 {
 	// small angle for every particle (2 * pi / numParticles)
 	float delta = 2.0f * Math::PI / float(numParticles);
+	// center of circle
+	civ::Ref<Particle> center = addParticle(position, pinCenter);
+	// store outer particles
+	std::vector<civ::Ref<Particle>> outerParticles(numParticles);
 
 	for (int i = 0; i < numParticles; i++)
 	{
 		float x = radius * std::cos(i * delta);
 		float y = radius * std::sin(i * delta);
-		addParticle({ position.x + x, position.y + y }, true);
+		civ::Ref<Particle> particle = addParticle({ position.x + x, position.y + y }, pinOuter);
+		outerParticles[i] = particle;
+		// add constraint to center
+		addConstraint(particle, center);
+	}
+
+	// connect every outer particle with their adjacent particles
+	for (int i = 0; i < numParticles; i++)
+	{
+		// connect adjacent and a further particle to make sure the structure is strong
+		// reference: https://github.com/subprotocol/verlet-js/blob/master/lib/objects.js#L102
+		int adjacent = (i + 1) % numParticles;
+		int far = (i + 5) % numParticles;
+		addConstraint(outerParticles[i], outerParticles[adjacent]);
+		addConstraint(outerParticles[i], outerParticles[far]);
 	}
 }
 
