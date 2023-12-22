@@ -103,13 +103,13 @@ civ::Ref<Particle> Solver::getClickedParticle(const sf::Vector2f& clickedPositio
 	return civ::Ref<Particle>();
 }
 
-civ::Ref<Constraint> Solver::addConstraint(civ::Ref<Particle> p1, civ::Ref<Particle> p2, float distance)
+civ::Ref<Constraint> Solver::addConstraint(civ::Ref<Particle> p1, civ::Ref<Particle> p2, float distance, float strength)
 {
 	civ::ID id = 0;
 	if (distance < 0.0f)
-		id = constraints.emplace_back(p1, p2, Math::getLength(p1->currentPosition - p2->currentPosition));
+		id = constraints.emplace_back(p1, p2, Math::getLength(p1->currentPosition - p2->currentPosition), strength);
 	else
-		id = constraints.emplace_back(p1, p2, distance);
+		id = constraints.emplace_back(p1, p2, distance, strength);
 	return constraints.createRef(id);
 }
 
@@ -135,7 +135,7 @@ const civ::IndexVector<Wind>& Solver::getWinds()
 }
 
 
-void Solver::addCube(const sf::Vector2f& position, bool pinned)
+void Solver::addCube(const sf::Vector2f& position, float stiffness, bool pinned)
 {
 	// use offset so that cube will be drawn at exactly that position
 	float offset = 2 * particleRadius;
@@ -152,23 +152,23 @@ void Solver::addCube(const sf::Vector2f& position, bool pinned)
 	civ::Ref<Particle> p8 = addParticle({ position.x, position.y + offset }, pinned);
 	civ::Ref<Particle> p9 = addParticle({ position.x + offset, position.y + offset }, pinned);
 	// edges
-	addConstraint(p1, p2);
-	addConstraint(p2, p3);
-	addConstraint(p1, p4);
-	addConstraint(p2, p5);
-	addConstraint(p3, p6);
-	addConstraint(p4, p5);
-	addConstraint(p5, p6);
-	addConstraint(p4, p7);
-	addConstraint(p5, p8);
-	addConstraint(p6, p9);
-	addConstraint(p7, p8);
-	addConstraint(p8, p9);
+	addConstraint(p1, p2, -1.0f, stiffness);
+	addConstraint(p2, p3, -1.0f, stiffness);
+	addConstraint(p1, p4, -1.0f, stiffness);
+	addConstraint(p2, p5, -1.0f, stiffness);
+	addConstraint(p3, p6, -1.0f, stiffness);
+	addConstraint(p4, p5, -1.0f, stiffness);
+	addConstraint(p5, p6, -1.0f, stiffness);
+	addConstraint(p4, p7, -1.0f, stiffness);
+	addConstraint(p5, p8, -1.0f, stiffness);
+	addConstraint(p6, p9, -1.0f, stiffness);
+	addConstraint(p7, p8, -1.0f, stiffness);
+	addConstraint(p8, p9, -1.0f, stiffness);
 	// main diagonal
-	addConstraint(p1, p5);
-	addConstraint(p2, p6);
-	addConstraint(p4, p8);
-	addConstraint(p5, p9);
+	addConstraint(p1, p5, -1.0, stiffness);
+	addConstraint(p2, p6, -1.0, stiffness);
+	addConstraint(p4, p8, -1.0, stiffness);
+	addConstraint(p5, p9, -1.0, stiffness);
 }
 
 void Solver::addChain(const sf::Vector2f& position, float chainLength)
@@ -194,7 +194,7 @@ void Solver::addChain(const sf::Vector2f& position, float chainLength)
 	}
 }
 
-void Solver::addCircle(const sf::Vector2f& position, float radius, int numParticles, bool pinCenter, bool pinOuter)
+void Solver::addCircle(const sf::Vector2f& position, float radius, int numParticles, float stiffness, bool pinCenter, bool pinOuter)
 {
 	// small angle for every particle (2 * pi / numParticles)
 	float delta = 2.0f * Math::PI / float(numParticles);
@@ -210,7 +210,7 @@ void Solver::addCircle(const sf::Vector2f& position, float radius, int numPartic
 		civ::Ref<Particle> particle = addParticle({ position.x + x, position.y + y }, pinOuter);
 		outerParticles[i] = particle;
 		// add constraint to center
-		addConstraint(particle, center);
+		addConstraint(particle, center, -1.0f, stiffness);
 	}
 
 	// connect every outer particle with their adjacent particles
@@ -220,8 +220,8 @@ void Solver::addCircle(const sf::Vector2f& position, float radius, int numPartic
 		// reference: https://github.com/subprotocol/verlet-js/blob/master/lib/objects.js#L102
 		int adjacent = (i + 1) % numParticles;
 		int far = (i + 5) % numParticles;
-		addConstraint(outerParticles[i], outerParticles[adjacent]);
-		addConstraint(outerParticles[i], outerParticles[far]);
+		addConstraint(outerParticles[i], outerParticles[adjacent], -1.0f, stiffness);
+		addConstraint(outerParticles[i], outerParticles[far], -1.0f, stiffness);
 	}
 }
 

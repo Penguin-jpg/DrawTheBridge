@@ -170,10 +170,10 @@ int main()
 				break;
 			}
 			case 1:
-				solver.addCube(mousePosition, pinned);
+				solver.addCube(mousePosition, 1.0f, pinned);
 				break;
 			case 2:
-				solver.addCircle(mousePosition, 50.0f, 15);
+				solver.addCircle(mousePosition, 50.0f, 4);
 			}
 		}
 

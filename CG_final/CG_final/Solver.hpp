@@ -24,7 +24,7 @@ public:
 	const civ::IndexVector<Particle>& getParticles();
 	const int getNumParticles();
 
-	civ::Ref<Constraint> addConstraint(civ::Ref<Particle> p1, civ::Ref<Particle> p2, float distance = -1.0f);
+	civ::Ref<Constraint> addConstraint(civ::Ref<Particle> p1, civ::Ref<Particle> p2, float distance = -1.0f, float strength = 1.0f);
 	const civ::IndexVector<Constraint>& getConstraints();
 	const int getNumLinks();
 
@@ -49,9 +49,9 @@ public:
 	// utility functions
 	bool isValidPosition(const sf::Vector2f& position);
 	civ::Ref<Particle> getClickedParticle(const sf::Vector2f& clickedPosition);
-	void addCube(const sf::Vector2f& position, bool pinned = false);
+	void addCube(const sf::Vector2f& position, float stiffness = 1.0f, bool pinned = false);
 	void addChain(const sf::Vector2f& position, float chainLength);
-	void addCircle(const sf::Vector2f& poisition, float radius, int numParticles, bool pinCenter = false, bool pinOuter = false);
+	void addCircle(const sf::Vector2f& poisition, float radius, int numParticles, float stiffness = 1.0f, bool pinCenter = false, bool pinOuter = false);
 
 	// timing functions
 	const float getElapsedTime();
