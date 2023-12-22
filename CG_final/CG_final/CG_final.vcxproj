@@ -149,7 +149,6 @@
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Solver.cpp" />
     <ClCompile Include="StateManager.cpp" />
-    <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CollisionGrid.hpp" />
