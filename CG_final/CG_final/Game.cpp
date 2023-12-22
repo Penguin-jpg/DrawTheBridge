@@ -92,3 +92,8 @@ const sf::Vector2f Game::getWorldMousePosition()
 {
 	return context.stateManager.getWorldMousePosition();
 }
+
+const sf::Vector2f Game::screenToWorldPosition(const sf::Vector2f& screenPosition)
+{
+	return context.stateManager.screenToWorldPosition(screenPosition);
+}

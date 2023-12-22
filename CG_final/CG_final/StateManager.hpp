@@ -45,6 +45,7 @@ public:
 	void undrag();
 	bool isClicked();
 	bool isDragging();
+	const sf::Vector2f screenToWorldPosition(const sf::Vector2f& screenPosition);
 	void updateMousePosition(const sf::Vector2f& newMousePosition);
 	const sf::Vector2f getScreenMousePosition();
 	const sf::Vector2f getWorldMousePosition();

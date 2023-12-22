@@ -28,6 +28,7 @@ public:
 	void undrag();
 	const sf::Vector2f getScreenMousePosition();
 	const sf::Vector2f getWorldMousePosition();
+	const sf::Vector2f screenToWorldPosition(const sf::Vector2f& screenPosition);
 
 	// store position for some checkings
 	sf::Vector2f clickPosition;

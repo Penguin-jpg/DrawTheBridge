@@ -5,6 +5,7 @@
 #include "Random.hpp"
 #include "Math.hpp"
 #include <iostream>
+#include <SelbaWard/Spline.hpp>
 
 
 int main()
@@ -157,7 +158,7 @@ int main()
 		const sf::Vector2f mousePosition = game.getWorldMousePosition();
 		if (!chaining && !grabbing && isBuilding && spawnTimer.getElapsedTime().asSeconds() >= OBJECT_SPAWN_TIME)
 		{
-			spawnTimer.restart();;
+			spawnTimer.restart();
 			switch (buildMode)
 			{
 			case 0:

@@ -67,12 +67,17 @@ bool StateManager::isDragging()
 	return state.dragging;
 }
 
+const sf::Vector2f StateManager::screenToWorldPosition(const sf::Vector2f& screenPosition)
+{
+	return state.offset + (screenPosition - state.center) / state.zoom;
+}
+
 void StateManager::updateMousePosition(const sf::Vector2f& newMousePosition)
 {
 	state.screenMousePosition = newMousePosition;
 	// since the position on the screen is not the real world position, we need to use inverse
 	// transform to take it back to world coordinate
-	state.worldMousePosition = state.offset + (newMousePosition - state.center) / state.zoom;
+	state.worldMousePosition = screenToWorldPosition(newMousePosition);
 }
 
 const sf::Vector2f StateManager::getScreenMousePosition()

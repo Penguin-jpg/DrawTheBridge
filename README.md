@@ -4,6 +4,7 @@
 - [SFML](https://www.sfml-dev.org/)
 - [Index vector](https://github.com/johnBuffer/ConstantIndexVector)
 - [Event manager](https://github.com/johnBuffer/SFML-EventManager)
+- [Selba Ward](https://github.com/Hapaxia/SelbaWard)
 
 ## Assets
 - [Gradient circular buttons](https://vapxiel.itch.io/gradient-circular-buttons)
