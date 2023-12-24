@@ -15,7 +15,7 @@ int main()
 	const int WINDOW_HEIGHT = 1080;
 	const int FRAMERATE = 60;
 	const int NUM_SUB_STEPS = 8;
-	const int NUM_NUM_OBJECTS = 2000;
+	const int MAX_NUM_OBJECTS = 2000;
 	const float OBJECT_RADIUS = 5.0f;
 	const int CELL_SIZE = 2 * OBJECT_RADIUS;
 	const float PARTICLE_SPAWN_TIME = 0.08f;
@@ -97,23 +97,11 @@ int main()
 		game.release();
 		game.undrag();
 		isBuilding = false;
-		//if (chaining)
-		//{
-		//	for (int i = 1; i < chainedParitlces.size(); i++)
-		//	{
-		//		solver.addConstraint(chainedParitlces[i - 1], chainedParitlces[i], 10.0f);
-		//	}
-		//	chainedParitlces.clear();
-		//}
 
-			// connect two particles with a constraint
+		// build a chain using two selected particles as pivots
 		if (connected[0] && connected[1])
 		{
-			solver.addConstraint(
-				connected[0],
-				connected[1],
-				Math::getDistance(connected[0]->currentPosition, connected[1]->currentPosition)
-			);
+			solver.addChain(connected[0], connected[1]);
 			connected[0] = civ::Ref<Particle>();
 			connected[1] = civ::Ref<Particle>();
 		}
@@ -150,7 +138,9 @@ int main()
 	{
 		game.handleEvents();
 
-		//if (solver.getNumParticles() < MAX_NUM_OBJECTS && spawnTimer.getElapsedTime().asSeconds() >= OBJECT_SPAWN_TIME) {
+		//if (solver.getNumParticles() < MAX_NUM_OBJECTS
+		//	&& spawnTimer.getElapsedTime().asSeconds() >= PARTICLE_SPAWN_TIME)
+		//{
 		//	spawnTimer.restart();
 		//	civ::Ref<Particle> particle = solver.addParticle(SPAWN_LOCATION);
 		//	const float elapsedTime = solver.getElapsedTime();
@@ -194,42 +184,6 @@ int main()
 				spawnTimer.restart();
 				solver.addCircle(mousePosition, 50.0f, 4);
 			}
-			//	switch (buildMode)
-			//	{
-			//	case 0:
-			//		if (spawnTimer.getElapsedTime().asSeconds() >= PARTICLE_SPAWN_TIME)
-			//		{
-			//			sf::Vector2f gridCoord = (sf::Vector2f)solver.getGrid().getGridCoordinate(mousePosition, OBJECT_RADIUS);
-			//			sf::Vector2f objectPosition(gridCoord.y * CELL_SIZE + OBJECT_RADIUS, gridCoord.x * CELL_SIZE + OBJECT_RADIUS);
-			//			civ::Ref<Particle> particle = solver.addParticle(objectPosition, pinned);
-			//			/*sf::Vector2f screenPosition = game.getScreenMousePosition();
-			//			spline.removeVertex(0);
-			//			spline.addVertex(screenPosition);
-			//			std::vector<sf::Vector2f> positions = spline.exportAllInterpolatedPositions();
-			//			for (int i = 0; i < positions.size(); i++)
-			//			{
-			//				sf::Vector2f position = game.screenToWorldPosition(positions[i - 1]);
-			//				sf::Vector2f diff = positions[i] - positions[i - 1];
-			//				sf::Vector2f direction = diff / Math::getLength(diff);
-			//				solver.addParticle(position + 10.0f * direction, true);
-			//			}*/
-			//			//if (chaining)
-			//			//	chainedParitlces.push_back(particle);
-			//		}
-			//		break;
-
-			//	case 1:
-			//		if (spawnTimer.getElapsedTime().asSeconds() >= CUBE_SPAWN_TIME)
-			//			solver.addCube(mousePosition, 1.0f, pinned);
-			//		break;
-			//	case 2:
-			//		if (spawnTimer.getElapsedTime().asSeconds() >= CIRCLE_SPAWN_TIME)
-			//			solver.addCircle(mousePosition, 50.0f, 4);
-			//		break;
-			//	}
-
-			//	spawnTimer.restart();
-
 		}
 
 		if (grabbing)

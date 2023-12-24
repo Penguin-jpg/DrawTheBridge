@@ -187,20 +187,28 @@ void Solver::addCube(const sf::Vector2f& position, float stiffness, bool pinned)
 	addConstraint(p5, p9, -1.0, stiffness);
 }
 
-void Solver::addChain(const sf::Vector2f& position, float chainLength)
+void Solver::addChain(civ::Ref<Particle> p1, civ::Ref<Particle> p2)
 {
 	// calculate how much particles needed
-	int numParticles = chainLength / (2 * particleRadius);
+	sf::Vector2f direction = p2->currentPosition - p1->currentPosition;
+	float length = Math::getLength(direction);
+	sf::Vector2f unit = direction / length;
+	int numParticles = length / (2 * particleRadius) + 1;
 	float offset = 2 * particleRadius;
-	sf::Vector2f chainPosition(position.x - offset, position.y - offset);
 
 	std::vector<civ::Ref<Particle>> ps(numParticles);
-	// manually create the first one
-	ps[0] = addParticle(chainPosition, true);
+	// manually create the first one and the last one
+	p1->pinned = true;
+	p2->pinned = true;
+	ps[0] = p1;
+	ps[numParticles - 1] = p2;
+
+	sf::Vector2f chainPosition(p1->currentPosition.x, p1->currentPosition.y);
+
 	// create rest ones along the y axis
-	for (int i = 1; i < numParticles; i++)
+	for (int i = 1; i < numParticles - 1; i++)
 	{
-		chainPosition += sf::Vector2f(5.0f, offset);
+		chainPosition += offset * unit;
 		ps[i] = addParticle(chainPosition);
 	}
 	// add constraints
@@ -284,7 +292,7 @@ void Solver::solveCollisionWithWorld(Particle& particle)
 void Solver::solveCollisions()
 {
 	// strength of bouncing response when colliding
-	const float responseStrength = 0.75f;
+	const float responseStrength = 1.0f;
 
 	// naive O(n^2) method
 	for (int i = 0; i < particles.size(); i++)
@@ -303,18 +311,14 @@ void Solver::solveCollisions()
 			if (distance < minDistance)
 			{
 				sf::Vector2f unit = direction / distance;
-				// use radius as ratio of bouncing
-				float total = p1.radius + p2.radius;
-				float ratio1 = p1.radius / total;
-				float ratio2 = p2.radius / total;
 
 				// distance to push to separate two particles
 				// minDistance - distance = overlappinig distance between two particles
 				// times 0.5 because each particles only need to move away half of that distance
 				float delta = responseStrength * 0.5f * (minDistance - distance);
 
-				p1.move(unit * (ratio2 * delta));
-				p2.move(-unit * (ratio1 * delta));
+				p1.move(unit * delta);
+				p2.move(-unit * delta);
 			}
 		}
 	}
@@ -383,7 +387,7 @@ void Solver::solveCellCollision(CollisionCell& cell1, CollisionCell& cell2)
 void Solver::solveParticleCollision(Particle* p1, Particle* p2)
 {
 	// strength of bouncing response when colliding
-	constexpr float responseCoef = 0.75f;
+	constexpr float responseCoef = 1.0f;
 
 	sf::Vector2f direction = p1->currentPosition - p2->currentPosition;
 	float distance = Math::getLength(direction);
@@ -393,18 +397,13 @@ void Solver::solveParticleCollision(Particle* p1, Particle* p2)
 	if (distance < minDistance)
 	{
 		sf::Vector2f unit = direction / distance;
-		// use radius as ratio of bouncing
-		float total = p1->radius + p2->radius;
-		float ratio1 = p1->radius / total;
-		float ratio2 = p2->radius / total;
 
 		// distance to push to separate two particles
 		// minDistance - distance = overlappinig distance between two particles
 		// times 0.5 because each particles only need to move away half of that distance
 		float delta = responseCoef * 0.5f * (minDistance - distance);
-
-		p1->move(unit * (ratio2 * delta));
-		p2->move(-unit * (ratio1 * delta));
+		p1->move(unit * delta);
+		p2->move(-unit * delta);
 	}
 }
 
