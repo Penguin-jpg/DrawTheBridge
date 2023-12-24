@@ -15,7 +15,7 @@ StartMenuState::StartMenuState(sf::RenderWindow& window) : startButton("assets/U
     background.setScale(true, window, 1.0f, 1.0f);
 }
 
-bool StartMenuState::handleInput(sf::RenderWindow& window, sf::Vector2i mousePos, StateID& currentStateID)  {
+bool StartMenuState::handleInput(sf::RenderWindow& window, sf::Vector2i mousePos, StateID& currentStateID, bool isWin)  {
     if (startButton.mSprite.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
         std::cout << "Start" << std::endl;
         currentStateID = StateID::LevelSelection;
@@ -71,7 +71,7 @@ LevelSelectionState::LevelSelectionState(sf::RenderWindow& window) : levelButton
     background.setScale(true, window, 1.0f, 1.0f);
 }
 
-bool LevelSelectionState::handleInput(sf::RenderWindow& window, sf::Vector2i mousePos, StateID& currentStateID) {
+bool LevelSelectionState::handleInput(sf::RenderWindow& window, sf::Vector2i mousePos, StateID& currentStateID, bool isWin) {
     for (int i = 0; i < numberOfLevels; ++i) {
         if (levelButton[i].mSprite.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
             std::cout << "Level " << i+1 << " pressed" << std::endl;
@@ -115,7 +115,7 @@ void LevelSelectionState::render(sf::RenderWindow& window) {
 
 
 
-LevelGameState::LevelGameState(sf::RenderWindow& window) :background("assets/UI/dark_background.jpg"), backBtn("assets/UI/back.png"), destinationFlag("assets/UI/red-flag.png"), refreshBtn("assets/UI/refresh.png"), chainingFlg("assets/UI/chaining.png"), pinnedFlg("assets/UI/pinned.png"), showGridFlg("assets/UI/show_grid.png"), windFlg("assets/UI/wind.png"), grabbingFlg("assets/UI/grabbing.png"), pauseFlg("assets/UI/pause.png"), playBtn("assets/UI/play.png"), pauseBtn("assets/UI/pause-button.png") {
+LevelGameState::LevelGameState(sf::RenderWindow& window) :background("assets/UI/dark_background.jpg"), backBtn("assets/UI/back.png"), destinationFlag("assets/UI/red-flag.png"), refreshBtn("assets/UI/refresh.png"), chainingFlg("assets/UI/chaining.png"), pinnedFlg("assets/UI/pinned.png"), showGridFlg("assets/UI/show_grid.png"), windFlg("assets/UI/wind.png"), grabbingFlg("assets/UI/grabbing.png"), pauseFlg("assets/UI/pause.png"), playBtn("assets/UI/play.png"), pauseBtn("assets/UI/pause-button.png"), win("assets/UI/win.png"),win_reload("assets/UI/win_reload.png"), win_continue("assets/UI/win_continue.png") {
 
     backBtn.setScale(false, window, 0.15f, 0.15f);
     backBtn.setPosition(70, 40);
@@ -139,9 +139,16 @@ LevelGameState::LevelGameState(sf::RenderWindow& window) :background("assets/UI/
     playBtn.setPosition(270, 40);
     pauseBtn.setScale(false, window, 0.15f, 0.15f);
     pauseBtn.setPosition(370, 40);
+
+    win.setScale(false, window, 0.25f, 0.25f);
+    win.setPosition(550, 340);
+    win_reload.setScale(false, window, 0.8f, 0.8f);
+    win_reload.setPosition(780, 650);
+    win_continue.setScale(false, window, 0.8f, 0.8f);
+    win_continue.setPosition(950, 650);
 }
 
-bool LevelGameState::handleInput(sf::RenderWindow& window, sf::Vector2i mousePos, StateID& currentStateID) {
+bool LevelGameState::handleInput(sf::RenderWindow& window, sf::Vector2i mousePos, StateID& currentStateID, bool isWin) {
 
     if (backBtn.mSprite.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
         currentStateID = StateID::LevelSelection;
@@ -159,6 +166,20 @@ bool LevelGameState::handleInput(sf::RenderWindow& window, sf::Vector2i mousePos
         return true;
     }
 
+    if (isWin) {
+        if (win_continue.mSprite.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+            std::cout << "win continue !!!!1" << std::endl;
+            currentStateID = StateID::LevelSelection;
+            return true;
+        }
+
+        if (win_reload.mSprite.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+            std::cout << "win reload !!!!1" << std::endl;
+            currentStateID = StateID::Refresh;
+            return true;
+        }
+    }
+
     return false;
 }
 
@@ -167,6 +188,9 @@ void LevelGameState::btnIsHovered(sf::RenderWindow& window, sf::Vector2i mousePo
     btnSetColor(backBtn, mousePos);
     btnSetColor(refreshBtn, mousePos);
     btnSetColor(playBtn, mousePos);
+    btnSetColor(playBtn, mousePos);
+    btnSetColor(win_reload, mousePos);
+    btnSetColor(win_continue, mousePos);
     //btnSetColor(pauseBtn, mousePos);
 }
 
@@ -201,7 +225,15 @@ void LevelGameState::render(sf::RenderWindow& window) {
     window.draw(grabbingFlg.mSprite);
     window.draw(pauseFlg.mSprite);
     window.draw(playBtn.mSprite);
+    
    // window.draw(pauseBtn.mSprite);
+}
+
+void LevelGameState::renderWinWindow(sf::RenderWindow& window) {
+
+    window.draw(win.mSprite);
+    window.draw(win_reload.mSprite);
+    window.draw(win_continue.mSprite);
 }
 
 Level1::Level1(sf::RenderWindow& window) : LevelGameState(window) {
@@ -242,7 +274,7 @@ void Level2::render(sf::RenderWindow& window) {
 */
 Level3::Level3(sf::RenderWindow& window) : LevelGameState(window) {
     destinationFlag.setScale(false, window, 0.4f, 0.4f);
-    destinationFlag.setPosition(200, 830);
+    destinationFlag.setPosition(750, 270);
 };
 
 /*

@@ -84,6 +84,11 @@ private:
 	bool grabbing = false; // grab clicked object
 	bool pause = true; // pause game or not
 
+
+	sf::Vector2f ballPos;
+	
+	float destinationFlg_Radius = 10.0f ;
+
 	StateID currentStateID;
 	GameState* currentGameState;
 	GameState* startMenuState;
@@ -94,6 +99,7 @@ private:
 	bool isMouseLeftPressed;
 	bool isMouseLeftPressAndReleased;
 	bool isInLevelGameState();
+	void clearLevelGameScene();
 	void createLevelOneScene();
 	void createLevelTwoScene();
 	void createLevelThreeScene();
@@ -102,6 +108,11 @@ private:
 	std::vector<int> circleIsForwrd;
 	std::vector<Obstacle> obstacles;
 
+	std::pair<int, int> ballIndex;
+	bool ballReachDestination;
+	sf::Vector2f destinationPos;
+
 	void addObstacle(std::pair<int, int> particleIndexRange, int isFowrad, int moveHorizontal, std::pair<int, int> horizontalBound, std::pair<int, int> verticalBound, float movingSpeed);
 
+	bool testText = false;
 };

@@ -21,6 +21,7 @@ Game::Game(int width, int height, const std::string& title, int windowStyle = sf
 	currentGameState = startMenuState;
 	isMouseLeftPressed = false;
 	isMouseLeftPressAndReleased = false;
+	ballReachDestination = false;
 }
 
 sf::RenderWindow& Game::getWindow()
@@ -113,27 +114,26 @@ void Game::addAdditionalEvents()
 			isMouseLeftPressed = false;
 		}
 
-		//if (chaining)
-		//{
-		//	for (int i = 1; i < chainedParitlces.size(); i++)
-		//	{
-		//		solver.addConstraint(chainedParitlces[i - 1], chainedParitlces[i], 10.0f);
-		//	}
-		//	chainedParitlces.clear();
-		//}
-
-			// connect two particles with a constraint
+		// build a chain using two selected particles as pivots
 		if (connected[0] && connected[1])
 		{
-			solver.addConstraint(
-				connected[0],
-				connected[1],
-				Math::getDistance(connected[0]->currentPosition, connected[1]->currentPosition)
-			);
+			solver.addChain(connected[0], connected[1]);
 			connected[0] = civ::Ref<Particle>();
 			connected[1] = civ::Ref<Particle>();
 		}
 		});
+
+		//if (connected[0] && connected[1])
+		//{
+		//	solver.addConstraint(
+		//		connected[0],
+		//		connected[1],
+		//		Math::getDistance(connected[0]->currentPosition, connected[1]->currentPosition)
+		//	);
+		//	connected[0] = civ::Ref<Particle>();
+		//	connected[1] = civ::Ref<Particle>();
+		//}
+		//});
 	eventManager.addMousePressedCallback(sf::Mouse::Right, [&](const sf::Event& event) {
 		useForce = true;
 		});
@@ -160,6 +160,11 @@ void Game::addAdditionalEvents()
 		});
 	eventManager.addKeyPressedCallback(sf::Keyboard::Space, [&](const sf::Event& event) {
 		pause = !pause;
+		});
+
+	eventManager.addKeyPressedCallback(sf::Keyboard::V, [&](const sf::Event& event) {
+
+		testText = true;
 		});
 }
 
@@ -206,17 +211,28 @@ bool Game::isInLevelGameState() {
 		return false;
 }
 
-void Game::createLevelOneScene() {
+
+void Game::clearLevelGameScene() {
 	solver.removeAllParticles();
+	obstacles.clear();
+	ballReachDestination = false;
+}
+
+void Game::createLevelOneScene() {
+
+	clearLevelGameScene();
 	sf::Vector2f recPos = { 90,240 };
 	solver.addRectangle(recPos, true, 13, 30, 5.0f, ParticleColor::Deg2);
 	recPos = { 400, 230 };
 	solver.addRectangle(recPos, true, 10, 15, 5.0f, ParticleColor::Deg2);
+	destinationPos = { 408.774, 124.811 };
+	ballPos = { 151.5, 28.3 };
+	ballIndex = solver.addCircle(ballPos, 10.0f, 6);
 }
 
 void Game::createLevelTwoScene() {
-	solver.removeAllParticles();
-	obstacles.clear();
+
+	clearLevelGameScene();
 	sf::Vector2f recPos = { 65, 100 };
 	solver.addRectangle(recPos, true, 12, 3, 5.0f, ParticleColor::Deg14);
 	recPos = { 200, 300 };
@@ -228,6 +244,11 @@ void Game::createLevelTwoScene() {
 	circlePos = { 380, 170 };
 	particleIndexRange = solver.addCircle(circlePos, 30, 20, ParticleColor::Deg15);
 	addObstacle(particleIndexRange, 0, 1, std::pair(150, 450), std::pair(0, 0), 120.0f);
+
+	destinationPos = { 432, 261.226 };
+	ballPos = { 141.5, 27.3 };
+	ballIndex = solver.addCircle(ballPos, 10.0f, 6);
+	// std::cout << "ballIndex : " << ballIndex.first << " " << ballIndex.second << std::endl;
 
 }
 
@@ -245,17 +266,19 @@ void Game::addObstacle(std::pair<int, int> particleIndexRange, int isFowrad, int
 }
 
 void Game::createLevelThreeScene() {
-	solver.removeAllParticles();
-	obstacles.clear();
-	sf::Vector2f recPos = { 200, 100 };
-	solver.addRectangle(recPos, true, 14, 5, 5.0f, ParticleColor::Deg2);
 
-	recPos = { 430, 200 };
-	solver.addRectangle(recPos, true, 12, 5, 5.0f, ParticleColor::Deg2);
+	clearLevelGameScene();
+	sf::Vector2f recPos = { 200, 150 };
+	solver.addRectangle(recPos, true, 14, 3, 5.0f, ParticleColor::Deg14);
+
+	recPos = { 380, 200 };
+	solver.addRectangle(recPos, true, 12, 3, 5.0f, ParticleColor::Deg14);
 
 	recPos = { 200, 300 };
-	solver.addRectangle(recPos, true, 60, 1, 5.0f, ParticleColor::Deg2);
+	solver.addRectangle(recPos, true, 60, 1, 5.0f, ParticleColor::Deg14);
 
+
+	/*
 	sf::Vector2f circlePos = { 330, 230 };
 	// solver.addCircle(mousePosition, 50.0f, 10);
 	std::pair<int, int> particleIndexRange = solver.addCircle(circlePos, 30, 20, ParticleColor::Deg15);
@@ -271,7 +294,7 @@ void Game::createLevelThreeScene() {
 	recPos = { 310, 100 };
 	particleIndexRange = solver.addRectangle(recPos, true, 4, 3, 5.0f, ParticleColor::Deg2);
 	addObstacle(particleIndexRange, 1, 0, std::pair(0, 0), std::pair(30, 120), 90.0f);
-
+	*/
 
 }
 
@@ -279,11 +302,26 @@ void Game::run() {
 	sf::Clock spawnTimer;
 	sf::Clock clock;
 
+	//sf::Font font;
+	//if (!font.loadFromFile("assets/Font/Arial.ttf")) {
+	//	// return -1; // handle error
+	//}
+
+	//sf::Text text;
+	//text.setFont(font);
+	//text.setString("");
+	//text.setCharacterSize(24);
+	//text.setFillColor(sf::Color::Red);
+	//text.setPosition(100, 300); // Adjust as needed
+
+
+
 	while (isRunning())
 	{
+		
 		handleEvents();
 		sf::Time dt = clock.restart();
-
+		
 
 		const sf::Vector2f mousePosition = getWorldMousePosition();
 		sf::Vector2i mousePos = sf::Mouse::getPosition(window);
@@ -291,10 +329,11 @@ void Game::run() {
 		sf::Vector2f objectPosition(gridCoord.y * CELL_SIZE + OBJECT_RADIUS, gridCoord.x * CELL_SIZE + OBJECT_RADIUS);
 
 
+
 		if (isMouseLeftPressAndReleased) {
 			isMouseLeftPressAndReleased = false;
 			StateID preStateID = currentStateID;
-			currentGameState->handleInput(window, mousePos, currentStateID);
+			currentGameState->handleInput(window, mousePos, currentStateID, ballReachDestination);
 
 
 			if (currentStateID == StateID::LevelGamePlay) {
@@ -347,7 +386,9 @@ void Game::run() {
 			else if (buildMode == 2 && spawnTimer.getElapsedTime().asSeconds() >= CIRCLE_SPAWN_TIME)
 			{
 				spawnTimer.restart();
-				solver.addCircle(mousePosition, 10.0f, 6);
+				std::cout << "mousePosition : " << mousePosition.x << " " << mousePosition.y << std::endl;
+				sf::Vector2f initVelocity = { -1.0, 0.3 };
+				solver.addCircle(mousePosition, 10.0f, 6, initVelocity);
 			}
 
 		}
@@ -370,6 +411,8 @@ void Game::run() {
 		currentGameState->btnIsHovered(window, mousePos);
 		currentGameState->flgIsPressed(chaining, pinned, showGrid, useWind, grabbing, pause);
 
+
+
 		if (useWind)
 			solver.applyWind();
 
@@ -378,6 +421,8 @@ void Game::run() {
 
 		if (!pause)
 			solver.update();
+
+
 
 		//spline.update();
 		
@@ -388,13 +433,34 @@ void Game::run() {
 			}
 		}
 		
-		clear();
-		currentGameState->render(window);
-		if (isInLevelGameState()) {
-			renderer.render(context, getWorldMousePosition(), buildMode, showGrid);
+		
+		if (isInLevelGameState() && !ballReachDestination) {
+			ballReachDestination = solver.IsBallReachDestination(ballIndex, destinationPos);
 		}
+		
+		clear();
+		
+		currentGameState->render(window);
+
+		if (isInLevelGameState()) {
+
+
+			renderer.render(context, getWorldMousePosition(), buildMode, showGrid);
+
+			// if ( )
+		}
+		if (ballReachDestination) {
+			currentGameState->renderWinWindow(window);
+		}
+
+
+		// currentGameState->renderWinWindow(window);
+		//window.draw(text); // Draw the text
 		//game.getWindow().draw(spline);
 		display();
+
+
+		//testText = false;
 	}
 
 }

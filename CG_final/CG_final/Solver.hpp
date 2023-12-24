@@ -51,15 +51,21 @@ public:
 	civ::Ref<Particle> getClickedParticle(const sf::Vector2f& clickedPosition);
 	civ::Ref<Particle> getNearestParticle(const sf::Vector2f& position);
 	void addCube(const sf::Vector2f& position, float stiffness = 1.0f, bool pinned = false);
-	void addChain(const sf::Vector2f& position, float chainLength);
-	void addCircle(const sf::Vector2f& poisition, float radius, int numParticles, float stiffness = 1.0f, bool pinCenter = false, bool pinOuter = false);
+	//void addChain(const sf::Vector2f& position, float chainLength);
+	void addChain(civ::Ref<Particle> p1, civ::Ref<Particle> p2);
+	std::pair<int, int> addCircle(const sf::Vector2f& poisition, float radius, int numParticles, float stiffness = 1.0f, bool pinCenter = false, bool pinOuter = false);
 
 	//std::pair<int, int> addCircle(const sf::Vector2f& poisition, float radius, int numParticles, ParticleColor color, float stiffness = 1.0f, bool pinCenter = true, bool pinOuter = true);
 
 	std::pair<int, int> addRectangle(const sf::Vector2f& position, bool pinned, int width, int height, float particleRadius, ParticleColor color);
 	// std::pair<int, int> addCircle(const sf::Vector2f& position, float radius, int numParticles);
+
+	void addCircle(const sf::Vector2f& poisition, float radius, int numParticles, sf::Vector2f initVelocity, float stiffness = 1.0f, bool pinCenter = false, bool pinOuter = false);
+
 	std::pair<int, int> addCircle(const sf::Vector2f& position, float radius, int numParticles, ParticleColor color);
 	void updateObstacle(int moveHorizontal, int& isForwrd, std::pair<int, int> particleRange, std::pair<int, int> horizontalRange, std::pair<int, int> verticalRange, float movingSpeed, sf::Time dt);
+
+	bool IsBallReachDestination(std::pair<int, int> ballIndexRange, sf::Vector2f destinationPos);
 	// timing functions
 	const float getElapsedTime();
 	void setFrameDt(const int framerate);

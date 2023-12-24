@@ -186,7 +186,7 @@ void Solver::addCube(const sf::Vector2f& position, float stiffness, bool pinned)
 	addConstraint(p4, p8, -1.0, stiffness);
 	addConstraint(p5, p9, -1.0, stiffness);
 }
-
+/*
 void Solver::addChain(const sf::Vector2f& position, float chainLength)
 {
 	// calculate how much particles needed
@@ -209,13 +209,47 @@ void Solver::addChain(const sf::Vector2f& position, float chainLength)
 		addConstraint(ps[i - 1], ps[i]);
 	}
 }
-
-void Solver::addCircle(const sf::Vector2f& position, float radius, int numParticles, float stiffness, bool pinCenter, bool pinOuter)
+*/
+void Solver::addChain(civ::Ref<Particle> p1, civ::Ref<Particle> p2)
 {
+	// calculate how much particles needed
+	sf::Vector2f direction = p2->currentPosition - p1->currentPosition;
+	float length = Math::getLength(direction);
+	sf::Vector2f unit = direction / length;
+	int numParticles = length / (2 * particleRadius) + 1;
+	float offset = 2 * particleRadius;
+
+	std::vector<civ::Ref<Particle>> ps(numParticles);
+	// manually create the first one and the last one
+	p1->pinned = true;
+	p2->pinned = true;
+	ps[0] = p1;
+	ps[numParticles - 1] = p2;
+
+	sf::Vector2f chainPosition(p1->currentPosition.x, p1->currentPosition.y);
+
+	// create rest ones along the y axis
+	for (int i = 1; i < numParticles - 1; i++)
+	{
+		chainPosition += offset * unit;
+		ps[i] = addParticle(chainPosition);
+	}
+	// add constraints
+	for (int i = 1; i < numParticles; i++)
+	{
+		addConstraint(ps[i - 1], ps[i]);
+	}
+}
+
+
+std::pair<int, int> Solver::addCircle(const sf::Vector2f& position, float radius, int numParticles, float stiffness, bool pinCenter, bool pinOuter)
+{
+	int startIndex = particles.size();
 	// small angle for every particle (2 * pi / numParticles)
 	float delta = 2.0f * Math::PI / float(numParticles);
 	// center of circle
 	civ::Ref<Particle> center = addParticle(position, pinCenter);
+	// std::cout << "add id : " << particles[particles.size() - 1].id << std::endl;
 	// store outer particles
 	std::vector<civ::Ref<Particle>> outerParticles(numParticles);
 
@@ -224,11 +258,12 @@ void Solver::addCircle(const sf::Vector2f& position, float radius, int numPartic
 		float x = radius * std::cos(i * delta);
 		float y = radius * std::sin(i * delta);
 		civ::Ref<Particle> particle = addParticle({ position.x + x, position.y + y }, pinOuter);
+		// std::cout << "add id : " << particles[particles.size() - 1].id << std::endl;
 		outerParticles[i] = particle;
 		// add constraint to center
 		addConstraint(particle, center, -1.0f, stiffness);
 	}
-	
+	int endIndex = particles.size() - 1;
 	// connect every outer particle with their adjacent particles
 	for (int i = 0; i < numParticles; i++)
 	{
@@ -240,6 +275,42 @@ void Solver::addCircle(const sf::Vector2f& position, float radius, int numPartic
 		addConstraint(outerParticles[i], outerParticles[far], -1.0f, stiffness);
 	}
 	
+	return std::make_pair(startIndex, endIndex);
+}
+
+void Solver::addCircle(const sf::Vector2f& position, float radius, int numParticles, sf::Vector2f initVelocity, float stiffness, bool pinCenter, bool pinOuter)
+{
+	// small angle for every particle (2 * pi / numParticles)
+	float delta = 2.0f * Math::PI / float(numParticles);
+	// center of circle
+	civ::Ref<Particle> center = addParticle(position, pinCenter);
+	// initVelocity : -1.0, 0.3
+	particles[particles.size() - 1].initVelocity(23.0f * initVelocity, 0.1);
+	// store outer particles
+	std::vector<civ::Ref<Particle>> outerParticles(numParticles);
+
+	for (int i = 0; i < numParticles; i++)
+	{
+		float x = radius * std::cos(i * delta);
+		float y = radius * std::sin(i * delta);
+		civ::Ref<Particle> particle = addParticle({ position.x + x, position.y + y }, pinOuter);
+		particles[particles.size() - 1].initVelocity(20.0f * initVelocity, 0.1);
+		outerParticles[i] = particle;
+		// add constraint to center
+		addConstraint(particle, center, -1.0f, stiffness);
+	}
+
+	// connect every outer particle with their adjacent particles
+	for (int i = 0; i < numParticles; i++)
+	{
+		// connect adjacent and a further particle to make sure the structure is strong
+		// reference: https://github.com/subprotocol/verlet-js/blob/master/lib/objects.js#L102
+		int adjacent = (i + 1) % numParticles;
+		int far = (i + 5) % numParticles;
+		addConstraint(outerParticles[i], outerParticles[adjacent], -1.0f, stiffness);
+		addConstraint(outerParticles[i], outerParticles[far], -1.0f, stiffness);
+	}
+
 }
 
 /*
@@ -316,6 +387,7 @@ std::pair<int, int> Solver::addCircle(const sf::Vector2f& position, float radius
 		float y = radius * std::sin(i * delta);
 		addParticle({ position.x + x, position.y + y }, true);
 		particles[particles.size() - 1].color = color;
+		//particles[particles.size() - 1].initVelocity(500.0f * sf::Vector2f(1.0f, 0.0f), solver.)
 	}
 	int endIndex = particles.size() - 1;
 	return std::make_pair(startIndex, endIndex);
@@ -326,6 +398,19 @@ void Solver::removeAllParticles()
 {
 	particles.getData().clear();
 	constraints.getData().clear();
+}
+
+bool Solver::IsBallReachDestination( std::pair<int,int> ballIndexRange, sf::Vector2f destinationPos) {
+
+	for (int i = ballIndexRange.first; i <= ballIndexRange.second; i++) {
+		sf::Vector2f direction = particles[i].currentPosition - destinationPos;
+		float distance = Math::getLength(direction);
+		if (distance < 15.0f ) {
+			return true;
+		}
+	}
+	return false;
+
 }
 
 void Solver::updateObstacle(int moveHorizontal, int& isForwrd, std::pair<int, int> particleRange, std::pair<int, int> horizontalRange, std::pair<int, int> verticalRange, float movingSpeed, sf::Time dt)
@@ -445,6 +530,7 @@ void Solver::solveCollisionWithWorld(Particle& particle)
 	}
 }
 
+/*
 void Solver::solveCollisions()
 {
 	// strength of bouncing response when colliding
@@ -479,6 +565,42 @@ void Solver::solveCollisions()
 
 				p1.move(unit * (ratio2 * delta));
 				p2.move(-unit * (ratio1 * delta));
+			}
+		}
+	}
+}
+*/
+
+void Solver::solveCollisions()
+{
+	// strength of bouncing response when colliding
+	const float responseStrength = 1.0f;
+
+	// naive O(n^2) method
+	for (int i = 0; i < particles.size(); i++)
+	{
+		Particle& p1 = particles[i];
+
+		for (int j = i + 1; j < particles.size(); j++)
+		{
+			Particle& p2 = particles[j];
+
+			sf::Vector2f direction = p1.currentPosition - p2.currentPosition;
+			float distance = Math::getLength(direction);
+			// the min distance to not overlap is the sum of radius
+			const float minDistance = p1.radius + p2.radius;
+
+			if (distance < minDistance)
+			{
+				sf::Vector2f unit = direction / distance;
+
+				// distance to push to separate two particles
+				// minDistance - distance = overlappinig distance between two particles
+				// times 0.5 because each particles only need to move away half of that distance
+				float delta = responseStrength * 0.5f * (minDistance - distance);
+
+				p1.move(unit * delta);
+				p2.move(-unit * delta);
 			}
 		}
 	}
@@ -543,7 +665,7 @@ void Solver::solveCellCollision(CollisionCell& cell1, CollisionCell& cell2)
 		}
 	}
 }
-
+/*
 void Solver::solveParticleCollision(Particle* p1, Particle* p2)
 {
 	// strength of bouncing response when colliding
@@ -569,6 +691,29 @@ void Solver::solveParticleCollision(Particle* p1, Particle* p2)
 
 		p1->move(unit * (ratio2 * delta));
 		p2->move(-unit * (ratio1 * delta));
+	}
+}
+*/
+void Solver::solveParticleCollision(Particle* p1, Particle* p2)
+{
+	// strength of bouncing response when colliding
+	constexpr float responseCoef = 1.0f;
+
+	sf::Vector2f direction = p1->currentPosition - p2->currentPosition;
+	float distance = Math::getLength(direction);
+	// the min distance to not overlap is the sum of radius
+	const float minDistance = p1->radius + p2->radius;
+
+	if (distance < minDistance)
+	{
+		sf::Vector2f unit = direction / distance;
+
+		// distance to push to separate two particles
+		// minDistance - distance = overlappinig distance between two particles
+		// times 0.5 because each particles only need to move away half of that distance
+		float delta = responseCoef * 0.5f * (minDistance - distance);
+		p1->move(unit * delta);
+		p2->move(-unit * delta);
 	}
 }
 
