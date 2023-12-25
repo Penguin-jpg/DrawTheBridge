@@ -63,8 +63,6 @@ public:
 
 	void run();
 
-
-
 private:
 	int windowWidth;
 	int windowHeight;
@@ -73,7 +71,7 @@ private:
 	sfev::EventManager eventManager;
 	RenderContext context;
 
-	
+
 	bool useForce = false; // apply force on objects
 	bool isBuilding = false; // build or not
 	int buildMode = 0; // 0: particle, 1: cube
@@ -86,8 +84,8 @@ private:
 
 
 	sf::Vector2f ballPos;
-	
-	float destinationFlg_Radius = 10.0f ;
+
+	float destinationFlg_Radius = 10.0f;
 
 	StateID currentStateID;
 	GameState* currentGameState;
@@ -112,7 +110,8 @@ private:
 	bool ballReachDestination;
 	sf::Vector2f destinationPos;
 
-	void addObstacle(std::pair<int, int> particleIndexRange, int isFowrad, int moveHorizontal, std::pair<int, int> horizontalBound, std::pair<int, int> verticalBound, float movingSpeed);
+	void addObstacle(bool isForward, bool moveHorizontal, const std::pair<int, int>& particleIndexRange,
+		const std::pair<int, int>& horizontalBound, const std::pair<int, int>& verticalBound, float movingSpeed);
 
 	bool testText = false;
 };

@@ -36,9 +36,6 @@
     <ClCompile Include="GameState.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
-    <ClCompile Include="Item.cpp">
-      <Filter>來源檔案</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Solver.hpp">

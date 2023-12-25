@@ -274,7 +274,7 @@ std::pair<int, int> Solver::addCircle(const sf::Vector2f& position, float radius
 		addConstraint(outerParticles[i], outerParticles[adjacent], -1.0f, stiffness);
 		addConstraint(outerParticles[i], outerParticles[far], -1.0f, stiffness);
 	}
-	
+
 	return std::make_pair(startIndex, endIndex);
 }
 
@@ -336,7 +336,7 @@ std::pair<int, int> Solver::addCircle(const sf::Vector2f& position, float radius
 		addConstraint(particle, center, -1.0f, stiffness);
 	}
 	int endIndex = particles.size() - 1;
-	
+
 	// connect every outer particle with their adjacent particles
 	for (int i = 0; i < numParticles; i++)
 	{
@@ -400,12 +400,12 @@ void Solver::removeAllParticles()
 	constraints.getData().clear();
 }
 
-bool Solver::IsBallReachDestination( std::pair<int,int> ballIndexRange, sf::Vector2f destinationPos) {
+bool Solver::IsBallReachDestination(const std::pair<int, int>& ballIndexRange, const sf::Vector2f& destinationPos) {
 
 	for (int i = ballIndexRange.first; i <= ballIndexRange.second; i++) {
 		sf::Vector2f direction = particles[i].currentPosition - destinationPos;
 		float distance = Math::getLength(direction);
-		if (distance < 15.0f ) {
+		if (distance < 15.0f) {
 			return true;
 		}
 	}
@@ -488,6 +488,82 @@ void Solver::updateObstacle(int moveHorizontal, int& isForwrd, std::pair<int, in
 		}
 	}
 
+}
+
+void Solver::updateObstacle2(Obstacle& obstacle, sf::Time dt)
+{
+	int minIndex, maxIndex;
+	int minPos, maxPos;
+
+	int startIndex = obstacle.particleIndexRange.first, endIndex = obstacle.particleIndexRange.second;
+	if (obstacle.moveHorizontal) {
+		// std::cout << "start : " << startIndex << " end : " << endIndex << std::endl;
+		minIndex = startIndex, maxIndex = startIndex;
+		minPos = particles[startIndex].currentPosition.x, maxPos = particles[startIndex].currentPosition.x;
+
+		for (int i = startIndex + 1; i <= endIndex; i++) {
+
+			if (particles[i].currentPosition.x < minPos) {
+				minIndex = i;
+				minPos = particles[i].currentPosition.x;
+			} // if
+			else if (particles[i].currentPosition.x > maxPos) {
+				maxIndex = i;
+				maxPos = particles[i].currentPosition.x;
+			} // if
+
+		}
+
+		// std::cout << "minIndex : " << minIndex << "  " << minPos << " ,maxIndex : " << maxIndex << "  " << maxPos << std::endl;
+	}
+	else {
+		minIndex = startIndex, maxIndex = startIndex;
+		minPos = particles[startIndex].currentPosition.y, maxPos = particles[startIndex].currentPosition.y;
+
+		for (int i = startIndex + 1; i <= endIndex; i++) {
+
+			if (particles[i].currentPosition.x < minPos) {
+				minIndex = i;
+				minPos = particles[i].currentPosition.y;
+			} // if
+			if (particles[i].currentPosition.x > maxPos) {
+				maxIndex = i;
+				maxPos = particles[i].currentPosition.y;
+			} // if
+
+		}
+
+	}
+
+
+	// float speed = 100.0f; // Speed in units per second
+	if (obstacle.isForward && (obstacle.moveHorizontal && maxPos >= obstacle.horizontalBound.second) || (!obstacle.moveHorizontal && maxPos >= obstacle.verticalBound.second)) {
+		obstacle.isForward = 0;
+	}
+	else if (!obstacle.isForward && (obstacle.moveHorizontal && minPos <= obstacle.horizontalBound.first) || (!obstacle.moveHorizontal && minPos <= obstacle.verticalBound.first)) {
+		obstacle.isForward = 1;
+	}
+
+	if (obstacle.isForward && obstacle.moveHorizontal) {
+		for (int i = startIndex; i <= endIndex; i++) {
+			particles[i].currentPosition.x += dt.asSeconds() * obstacle.movingSpeed;
+		}
+	}
+	else if (obstacle.isForward && !obstacle.moveHorizontal) {
+		for (int i = startIndex; i <= endIndex; i++) {
+			particles[i].currentPosition.y += dt.asSeconds() * obstacle.movingSpeed;
+		}
+	}
+	else if (!obstacle.isForward && obstacle.moveHorizontal) {
+		for (int i = startIndex; i <= endIndex; i++) {
+			particles[i].currentPosition.x -= dt.asSeconds() * obstacle.movingSpeed;
+		}
+	}
+	else if (!obstacle.isForward && !obstacle.moveHorizontal) {
+		for (int i = startIndex; i <= endIndex; i++) {
+			particles[i].currentPosition.y -= dt.asSeconds() * obstacle.movingSpeed;
+		}
+	}
 }
 
 bool Solver::isValidPosition(const sf::Vector2f& position)

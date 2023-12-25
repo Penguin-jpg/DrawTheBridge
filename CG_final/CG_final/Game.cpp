@@ -123,17 +123,17 @@ void Game::addAdditionalEvents()
 		}
 		});
 
-		//if (connected[0] && connected[1])
-		//{
-		//	solver.addConstraint(
-		//		connected[0],
-		//		connected[1],
-		//		Math::getDistance(connected[0]->currentPosition, connected[1]->currentPosition)
-		//	);
-		//	connected[0] = civ::Ref<Particle>();
-		//	connected[1] = civ::Ref<Particle>();
-		//}
-		//});
+	//if (connected[0] && connected[1])
+	//{
+	//	solver.addConstraint(
+	//		connected[0],
+	//		connected[1],
+	//		Math::getDistance(connected[0]->currentPosition, connected[1]->currentPosition)
+	//	);
+	//	connected[0] = civ::Ref<Particle>();
+	//	connected[1] = civ::Ref<Particle>();
+	//}
+	//});
 	eventManager.addMousePressedCallback(sf::Mouse::Right, [&](const sf::Event& event) {
 		useForce = true;
 		});
@@ -233,36 +233,29 @@ void Game::createLevelOneScene() {
 void Game::createLevelTwoScene() {
 
 	clearLevelGameScene();
-	sf::Vector2f recPos = { 65, 100 };
+	sf::Vector2f recPos = { 65.0f, 100.0f };
 	solver.addRectangle(recPos, true, 12, 3, 5.0f, ParticleColor::Deg14);
-	recPos = { 200, 300 };
+	recPos = { 200.0f, 300.0f };
 	solver.addRectangle(recPos, true, 60, 1, 5.0f, ParticleColor::Deg14);
 
-	sf::Vector2f circlePos = { 220, 80 };
+	sf::Vector2f circlePos = { 220.0f, 80.0f };
 	std::pair<int, int> particleIndexRange = solver.addCircle(circlePos, 30, 20, ParticleColor::Deg15);
-	addObstacle(particleIndexRange, 1, 1, std::pair(150, 450), std::pair(0, 0), 120.0f);
-	circlePos = { 380, 170 };
+	addObstacle(true, true, particleIndexRange, std::pair(150, 450), std::pair(0, 0), 120.0f);
+	circlePos = { 380.0f, 170.0f };
 	particleIndexRange = solver.addCircle(circlePos, 30, 20, ParticleColor::Deg15);
-	addObstacle(particleIndexRange, 0, 1, std::pair(150, 450), std::pair(0, 0), 120.0f);
+	addObstacle(false, true, particleIndexRange, std::pair(150, 450), std::pair(0, 0), 120.0f);
 
-	destinationPos = { 432, 261.226 };
-	ballPos = { 141.5, 27.3 };
+	destinationPos = { 432.0f, 261.226f };
+	ballPos = { 141.5f, 27.3f };
 	ballIndex = solver.addCircle(ballPos, 10.0f, 6);
 	// std::cout << "ballIndex : " << ballIndex.first << " " << ballIndex.second << std::endl;
 
 }
 
-void Game::addObstacle(std::pair<int, int> particleIndexRange, int isFowrad, int moveHorizontal, std::pair<int, int> horizontalBound, std::pair<int, int> verticalBound, float movingSpeed) {
-
-	Obstacle anObstacle;
-	anObstacle.particleIndexRange = particleIndexRange;
-	anObstacle.isFowrad = isFowrad;
-	anObstacle.moveHorizontal = moveHorizontal;
-	anObstacle.horizontalBound = horizontalBound;
-	anObstacle.verticalBound = verticalBound;
-	anObstacle.movingSpeed = movingSpeed;
-	obstacles.push_back(anObstacle);
-	return;
+void Game::addObstacle(bool isForward, bool moveHorizontal, const std::pair<int, int>& particleIndexRange,
+	const std::pair<int, int>& horizontalBound, const std::pair<int, int>& verticalBound, float movingSpeed)
+{
+	obstacles.emplace_back(isForward, moveHorizontal, particleIndexRange, horizontalBound, verticalBound, movingSpeed);
 }
 
 void Game::createLevelThreeScene() {
@@ -318,14 +311,14 @@ void Game::run() {
 
 	while (isRunning())
 	{
-		
+
 		handleEvents();
 		sf::Time dt = clock.restart();
-		
 
-		const sf::Vector2f mousePosition = getWorldMousePosition();
-		sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-		const sf::Vector2f gridCoord = (sf::Vector2f)solver.getGrid().getGridCoordinate(mousePosition, OBJECT_RADIUS);
+
+		const sf::Vector2f worldMousePosition = getWorldMousePosition();
+		const sf::Vector2f screenMousePosition = getScreenMousePosition();
+		const sf::Vector2f gridCoord = (sf::Vector2f)solver.getGrid().getGridCoordinate(worldMousePosition, OBJECT_RADIUS);
 		sf::Vector2f objectPosition(gridCoord.y * CELL_SIZE + OBJECT_RADIUS, gridCoord.x * CELL_SIZE + OBJECT_RADIUS);
 
 
@@ -333,7 +326,7 @@ void Game::run() {
 		if (isMouseLeftPressAndReleased) {
 			isMouseLeftPressAndReleased = false;
 			StateID preStateID = currentStateID;
-			currentGameState->handleInput(window, mousePos, currentStateID, ballReachDestination);
+			currentGameState->handleInput(window, screenMousePosition, currentStateID, ballReachDestination);
 
 
 			if (currentStateID == StateID::LevelGamePlay) {
@@ -381,24 +374,24 @@ void Game::run() {
 			else if (buildMode == 1 && spawnTimer.getElapsedTime().asSeconds() >= CUBE_SPAWN_TIME)
 			{
 				spawnTimer.restart();
-				solver.addCube(mousePosition, 1.0f, pinned);
+				solver.addCube(worldMousePosition, 1.0f, pinned);
 			}
 			else if (buildMode == 2 && spawnTimer.getElapsedTime().asSeconds() >= CIRCLE_SPAWN_TIME)
 			{
 				spawnTimer.restart();
-				std::cout << "mousePosition : " << mousePosition.x << " " << mousePosition.y << std::endl;
+				std::cout << "mousePosition : " << worldMousePosition.x << " " << worldMousePosition.y << std::endl;
 				sf::Vector2f initVelocity = { -1.0, 0.3 };
-				solver.addCircle(mousePosition, 10.0f, 6, initVelocity);
+				solver.addCircle(worldMousePosition, 10.0f, 6, initVelocity);
 			}
 
 		}
 
 		if (grabbing)
 		{
-			civ::Ref<Particle> grabbed = solver.getNearestParticle(mousePosition);
+			civ::Ref<Particle> grabbed = solver.getNearestParticle(worldMousePosition);
 			if (grabbed)
 			{
-				sf::Vector2f direction = mousePosition - grabbed->currentPosition;
+				sf::Vector2f direction = worldMousePosition - grabbed->currentPosition;
 				float distance = Math::getLength(direction);
 				if (distance > 0.3f)
 				{
@@ -408,7 +401,7 @@ void Game::run() {
 			}
 		}
 
-		currentGameState->btnIsHovered(window, mousePos);
+		currentGameState->btnIsHovered(window, screenMousePosition);
 		currentGameState->flgIsPressed(chaining, pinned, showGrid, useWind, grabbing, pause);
 
 
@@ -425,21 +418,22 @@ void Game::run() {
 
 
 		//spline.update();
-		
+
 		if (currentStateID == StateID::Level2 || currentStateID == StateID::Level3) {
 
 			for (int i = 0; i < obstacles.size(); i++) {
-				solver.updateObstacle(obstacles[i].moveHorizontal, obstacles[i].isFowrad, obstacles[i].particleIndexRange, obstacles[i].horizontalBound, obstacles[i].verticalBound, obstacles[i].movingSpeed, dt);
+				//solver.updateObstacle(obstacles[i].moveHorizontal, obstacles[i].isForward, obstacles[i].particleIndexRange, obstacles[i].horizontalBound, obstacles[i].verticalBound, obstacles[i].movingSpeed, dt);
+				solver.updateObstacle2(obstacles[i], dt);
 			}
 		}
-		
-		
+
+
 		if (isInLevelGameState() && !ballReachDestination) {
 			ballReachDestination = solver.IsBallReachDestination(ballIndex, destinationPos);
 		}
-		
+
 		clear();
-		
+
 		currentGameState->render(window);
 
 		if (isInLevelGameState()) {

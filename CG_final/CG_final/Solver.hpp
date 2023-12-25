@@ -6,6 +6,7 @@
 #include "Constraint.hpp"
 #include "Wind.hpp"
 #include "CollisionGrid.hpp"
+#include "Obstacle.hpp"
 
 // this class is in charge of physics
 class Solver
@@ -64,8 +65,9 @@ public:
 
 	std::pair<int, int> addCircle(const sf::Vector2f& position, float radius, int numParticles, ParticleColor color);
 	void updateObstacle(int moveHorizontal, int& isForwrd, std::pair<int, int> particleRange, std::pair<int, int> horizontalRange, std::pair<int, int> verticalRange, float movingSpeed, sf::Time dt);
+	void updateObstacle2(Obstacle& obstacle, sf::Time dt);
 
-	bool IsBallReachDestination(std::pair<int, int> ballIndexRange, sf::Vector2f destinationPos);
+	bool IsBallReachDestination(const std::pair<int, int>& ballIndexRange, const sf::Vector2f& destinationPos);
 	// timing functions
 	const float getElapsedTime();
 	void setFrameDt(const int framerate);

@@ -1,21 +1,19 @@
 #pragma once
-#include <iostream>
+#include <utility>
+#include <SFML/Graphics.hpp>
 
-class Obstacle {
-public:
+struct Obstacle
+{
+	bool isForward = true, moveHorizontal = true;
+	std::pair<int, int> particleIndexRange;
+	std::pair<int, int> horizontalBound;
+	std::pair<int, int> verticalBound;
 
-    Obstacle(){
-        isFowrad = 1;
-        moveHorizontal = 1;
-        moveVertical = 0;
-        movingSpeed = 100.0f;
-    }
+	float movingSpeed = 100.0f;
 
-    int isFowrad;
-    int moveHorizontal;
-    int moveVertical;
-    std::pair<int, int> particleIndexRange;
-    std::pair<int, int> horizontalBound;
-    std::pair<int, int> verticalBound;
-    float movingSpeed;
+	Obstacle() = default;
+	Obstacle(bool isForward, bool moveHorizontal, std::pair<int, int> particleIndexRange,
+		std::pair<int, int> horizontalBound, std::pair<int, int> verticalBound, float movingSpeed)
+		:isForward(isForward), moveHorizontal(moveHorizontal), particleIndexRange(particleIndexRange),
+		horizontalBound(horizontalBound), verticalBound(verticalBound), movingSpeed(movingSpeed) {}
 };
