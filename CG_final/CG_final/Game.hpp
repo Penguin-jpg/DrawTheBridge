@@ -109,9 +109,10 @@ private:
 	std::pair<int, int> ballIndex;
 	bool ballReachDestination;
 	sf::Vector2f destinationPos;
-
+	sf::Vector2f ballInitVelocity = { 0.0f, 0.0f };
 	void addObstacle(bool isForward, bool moveHorizontal, const std::pair<int, int>& particleIndexRange,
 		const std::pair<int, int>& horizontalBound, const std::pair<int, int>& verticalBound, float movingSpeed);
 
+	bool isGameOver;
 	bool testText = false;
 };

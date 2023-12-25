@@ -241,7 +241,7 @@ void Solver::addChain(civ::Ref<Particle> p1, civ::Ref<Particle> p2)
 	}
 }
 
-
+/*
 std::pair<int, int> Solver::addCircle(const sf::Vector2f& position, float radius, int numParticles, float stiffness, bool pinCenter, bool pinOuter)
 {
 	int startIndex = particles.size();
@@ -277,15 +277,22 @@ std::pair<int, int> Solver::addCircle(const sf::Vector2f& position, float radius
 
 	return std::make_pair(startIndex, endIndex);
 }
+*/
 
-void Solver::addCircle(const sf::Vector2f& position, float radius, int numParticles, sf::Vector2f initVelocity, float stiffness, bool pinCenter, bool pinOuter)
+
+std::pair<int, int> Solver::addCircle(const sf::Vector2f& position, float radius, int numParticles, sf::Vector2f initVelocity, float stiffness, bool pinCenter, bool pinOuter)
 {
+	int startIndex = particles.size();
 	// small angle for every particle (2 * pi / numParticles)
 	float delta = 2.0f * Math::PI / float(numParticles);
 	// center of circle
 	civ::Ref<Particle> center = addParticle(position, pinCenter);
 	// initVelocity : -1.0, 0.3
-	particles[particles.size() - 1].initVelocity(23.0f * initVelocity, 0.1);
+
+	if (initVelocity.x != 0.0f || initVelocity.y != 0.0f) {
+		particles[particles.size() - 1].initVelocity(23.0f * initVelocity, 0.1);
+	}
+	
 	// store outer particles
 	std::vector<civ::Ref<Particle>> outerParticles(numParticles);
 
@@ -294,12 +301,14 @@ void Solver::addCircle(const sf::Vector2f& position, float radius, int numPartic
 		float x = radius * std::cos(i * delta);
 		float y = radius * std::sin(i * delta);
 		civ::Ref<Particle> particle = addParticle({ position.x + x, position.y + y }, pinOuter);
-		particles[particles.size() - 1].initVelocity(20.0f * initVelocity, 0.1);
+		if (initVelocity.x != 0.0f || initVelocity.y != 0.0f) {
+			particles[particles.size() - 1].initVelocity(23.0f * initVelocity, 0.1);
+		}
 		outerParticles[i] = particle;
 		// add constraint to center
 		addConstraint(particle, center, -1.0f, stiffness);
 	}
-
+	int endIndex = particles.size() - 1;
 	// connect every outer particle with their adjacent particles
 	for (int i = 0; i < numParticles; i++)
 	{
@@ -311,6 +320,7 @@ void Solver::addCircle(const sf::Vector2f& position, float radius, int numPartic
 		addConstraint(outerParticles[i], outerParticles[far], -1.0f, stiffness);
 	}
 
+	return std::make_pair(startIndex, endIndex);
 }
 
 /*
@@ -400,7 +410,7 @@ void Solver::removeAllParticles()
 	constraints.getData().clear();
 }
 
-bool Solver::IsBallReachDestination(const std::pair<int, int>& ballIndexRange, const sf::Vector2f& destinationPos) {
+bool Solver::IsBallReachDestination(const std::pair<int, int> ballIndexRange, const sf::Vector2f& destinationPos) {
 
 	for (int i = ballIndexRange.first; i <= ballIndexRange.second; i++) {
 		sf::Vector2f direction = particles[i].currentPosition - destinationPos;
@@ -411,6 +421,25 @@ bool Solver::IsBallReachDestination(const std::pair<int, int>& ballIndexRange, c
 	}
 	return false;
 
+}
+
+
+bool Solver::IsBallCollideObstacle(const std::pair<int, int> ballIndexRange, std::vector<Obstacle> obstacles) {
+
+	for (int i = ballIndexRange.first; i <= ballIndexRange.second; i++) {
+		for (int j = 0; j < obstacles.size(); j++ ) {
+			for (int k = obstacles[j].particleIndexRange.first; k < obstacles[j].particleIndexRange.second ; k++) {
+				sf::Vector2f direction = particles[i].currentPosition - particles[k].currentPosition ;
+				float distance = Math::getLength(direction);
+				if (distance < 10.0f) {
+					return true;
+				}
+			}
+			
+		} // for
+
+	}
+	return false;
 }
 
 void Solver::updateObstacle(int moveHorizontal, int& isForwrd, std::pair<int, int> particleRange, std::pair<int, int> horizontalRange, std::pair<int, int> verticalRange, float movingSpeed, sf::Time dt)

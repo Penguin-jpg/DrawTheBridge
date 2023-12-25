@@ -17,7 +17,7 @@ enum class StateID {
 class GameState {
 public:
 	std::vector<StateID> levelStates = { StateID::Level1, StateID::Level2, StateID::Level3 };
-	virtual bool handleInput(sf::RenderWindow& window, const sf::Vector2f& mousePos, StateID& currentStateID, bool isWin) = 0;
+	virtual bool handleInput(sf::RenderWindow& window, const sf::Vector2f& mousePos, StateID& currentStateID, bool isWin, bool isLose) = 0;
 	virtual void update(sf::Time dt) = 0;
 	virtual void render(sf::RenderWindow& window) = 0;
 	virtual void btnIsHovered(sf::RenderWindow& window, const sf::Vector2f& mousePos) = 0;
@@ -44,6 +44,10 @@ public:
 	virtual void renderWinWindow(sf::RenderWindow& window) {
 
 	}
+
+	virtual void renderLoseWindow(sf::RenderWindow& window) {
+
+	}
 	virtual ~GameState() {}
 
 };
@@ -58,7 +62,7 @@ public:
 	StartMenuState();
 	StartMenuState(sf::RenderWindow& window);
 
-	bool handleInput(sf::RenderWindow& window, const sf::Vector2f& mousePos, StateID& currentStateID, bool isWin) override;
+	bool handleInput(sf::RenderWindow& window, const sf::Vector2f& mousePos, StateID& currentStateID, bool isWin, bool isLose) override;
 	void btnIsHovered(sf::RenderWindow& window, const sf::Vector2f& mousePos) override;
 	void update(sf::Time dt) override;
 	void render(sf::RenderWindow& window) override;
@@ -84,7 +88,7 @@ public:
 
 	LevelSelectionState(sf::RenderWindow& window);
 
-	bool handleInput(sf::RenderWindow& window, const sf::Vector2f& mousePos, StateID& currentStateID, bool isWin) override;
+	bool handleInput(sf::RenderWindow& window, const sf::Vector2f& mousePos, StateID& currentStateID, bool isWin, bool isLose) override;
 
 	void btnIsHovered(sf::RenderWindow& window, const sf::Vector2f& mousePos) override;
 	void update(sf::Time dt) override;
@@ -113,20 +117,23 @@ public:
 	Item win;
 	Item win_reload;
 	Item win_continue;
+	Item game_over;
+	Item game_over_list;
 
-	LevelGameState() : background("assets/UI/background2.jpg"), destinationFlag("assets/UI/red-flag.png"), chainingFlg("assets/UI/chaining.png"), pinnedFlg("assets/UI/pinned.png"), showGridFlg("assets/UI/show_grid.png"), windFlg("assets/UI/wind.png"), grabbingFlg("assets/UI/grabbing.png"), pauseFlg("assets/UI/pause.png"), playBtn("assets/UI/play.png"), pauseBtn("assets/UI/pause-button.png"), win("assets/UI/win.png"), win_reload("assets/UI/win_reload.png"), win_continue("assets/UI/win_continue.png") {
+	LevelGameState() : background("assets/UI/background2.jpg"), destinationFlag("assets/UI/red-flag.png"), chainingFlg("assets/UI/chaining.png"), pinnedFlg("assets/UI/pinned.png"), showGridFlg("assets/UI/show_grid.png"), windFlg("assets/UI/wind.png"), grabbingFlg("assets/UI/grabbing.png"), pauseFlg("assets/UI/pause.png"), playBtn("assets/UI/play.png"), pauseBtn("assets/UI/pause-button.png"), win("assets/UI/win2.png"), win_reload("assets/UI/win_reload.png"), win_continue("assets/UI/win_continue.png"), game_over("assets/UI/game_over.png"), game_over_list("assets/UI/list.png") {
 
 	}
 
 	LevelGameState(sf::RenderWindow& window);
 
-	bool handleInput(sf::RenderWindow& window, const sf::Vector2f& mousePos, StateID& currentStateID, bool isWin) override;
+	bool handleInput(sf::RenderWindow& window, const sf::Vector2f& mousePos, StateID& currentStateID, bool isWin, bool isLose) override;
 
 	void btnIsHovered(sf::RenderWindow& window, const sf::Vector2f& mousePos) override;
 	void flgIsPressed(bool chaining, bool pinned, bool showGrid, bool useWind, bool grabbing, bool pause) override;
 	void update(sf::Time dt) override;
 	void render(sf::RenderWindow& window) override;
 	void renderWinWindow(sf::RenderWindow& window) override;
+	void renderLoseWindow(sf::RenderWindow& window) override;
 
 };
 
