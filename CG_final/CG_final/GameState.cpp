@@ -31,7 +31,7 @@ void StartMenuState::btnIsHovered(sf::RenderWindow& window, const sf::Vector2f& 
 	btnSetColor(startButton, mousePos);
 }
 
-void StartMenuState::update(sf::Time dt) {
+void StartMenuState::update(float dt) {
 
 	// Update animations or other elements
 }
@@ -47,22 +47,18 @@ void StartMenuState::render(sf::RenderWindow& window) {
 }
 
 
-
-
-
-
 LevelSelectionState::LevelSelectionState() : background("assets/UI/background2.jpg") {
 
 }
 
 
-LevelSelectionState::LevelSelectionState(sf::RenderWindow& window) : levelButton(numberOfLevels), background("assets/UI/background2.jpg"), titleBtn("assets/UI/select_level.png"), backBtn("assets/UI/back.png") {
+LevelSelectionState::LevelSelectionState(sf::RenderWindow& window) : levelButton(NUM_LEVELS), background("assets/UI/background2.jpg"), titleBtn("assets/UI/select_level.png"), backBtn("assets/UI/back.png") {
 	std::string levelImage[3] = { "one", "two", "three" };
 	titleBtn.setScale(false, window, 0.3f, 0.3f);
 	titleBtn.setPosition(450, 50);
 	backBtn.setScale(false, window, 0.15f, 0.15f);
 	backBtn.setPosition(70, 40);
-	for (int i = 0; i < numberOfLevels; i++) {
+	for (int i = 0; i < NUM_LEVELS; i++) {
 		std::string imagePath = "assets/UI/" + levelImage[i] + ".png";
 		levelButton[i].setTexure(imagePath);
 		levelButton[i].setScale(false, window, 0.5f, 0.5f);
@@ -72,7 +68,7 @@ LevelSelectionState::LevelSelectionState(sf::RenderWindow& window) : levelButton
 }
 
 bool LevelSelectionState::handleInput(sf::RenderWindow& window, const sf::Vector2f& mousePos, StateID& currentStateID, bool isWin, bool isLose) {
-	for (int i = 0; i < numberOfLevels; ++i) {
+	for (int i = 0; i < NUM_LEVELS; ++i) {
 		if (levelButton[i].mSprite.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
 			std::cout << "Level " << i + 1 << " pressed" << std::endl;
 			currentStateID = levelStates[i];
@@ -97,7 +93,7 @@ void LevelSelectionState::btnIsHovered(sf::RenderWindow& window, const sf::Vecto
 
 }
 
-void LevelSelectionState::update(sf::Time dt) {
+void LevelSelectionState::update(float dt) {
 
 	// Update animations or other elements
 }
@@ -226,7 +222,7 @@ void LevelGameState::flgIsPressed(bool chaining, bool pinned, bool showGrid, boo
 	flgSetColor(pauseFlg, pause);
 }
 
-void LevelGameState::update(sf::Time dt) {
+void LevelGameState::update(float dt) {
 
 	// Update animations or other elements
 }

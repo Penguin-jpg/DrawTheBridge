@@ -15,6 +15,7 @@ void Solver::update()
 		fillCollisionGrid();
 		solveGridCollision();
 		//solveCollisions();
+		updateObstacles(stepDt);
 		updateParticles(stepDt);
 		updateConstraints(stepDt);
 	}
@@ -59,6 +60,26 @@ void Solver::updateConstraints(float dt)
 		constraint.update(dt);
 	}
 }
+
+void Solver::updateObstacles(float dt)
+{
+	for (Obstacle& obstacle : obstacles)
+	{
+		solveObstacleCollision(obstacle);
+		int startIndex = obstacle.particleIndexRange.first, endIndex = obstacle.particleIndexRange.second;
+		if (obstacle.moveHorizontal) {
+			for (int i = startIndex; i <= endIndex; i++) {
+				particles[i].currentPosition.x += obstacle.direction * obstacle.movingSpeed * dt;
+			}
+		}
+		else {
+			for (int i = startIndex; i <= endIndex; i++) {
+				particles[i].currentPosition.y += obstacle.direction * obstacle.movingSpeed * dt;
+			}
+		}
+	}
+}
+
 
 void Solver::applyForce(float radius, const sf::Vector2f& position)
 {
@@ -148,6 +169,17 @@ civ::Ref<Wind> Solver::addWind(const sf::Vector2f& position, const sf::Vector2f&
 const civ::IndexVector<Wind>& Solver::getWinds()
 {
 	return winds;
+}
+
+civ::Ref<Obstacle> Solver::addObstacle(int direction, bool moveHorizontal, const std::pair<int, int>& particleIndexRange, const std::pair<float, float>& horizontalBound, const std::pair<float, float>& verticalBound, float movingSpeed)
+{
+	civ::ID id = obstacles.emplace_back(direction, moveHorizontal, particleIndexRange, horizontalBound, verticalBound, movingSpeed);
+	return obstacles.createRef(id);
+}
+
+const civ::IndexVector<Obstacle>& Solver::getObstacles()
+{
+	return obstacles;
 }
 
 
@@ -292,7 +324,7 @@ std::pair<int, int> Solver::addCircle(const sf::Vector2f& position, float radius
 	if (initVelocity.x != 0.0f || initVelocity.y != 0.0f) {
 		particles[particles.size() - 1].initVelocity(23.0f * initVelocity, 0.1);
 	}
-	
+
 	// store outer particles
 	std::vector<civ::Ref<Particle>> outerParticles(numParticles);
 
@@ -404,13 +436,15 @@ std::pair<int, int> Solver::addCircle(const sf::Vector2f& position, float radius
 }
 
 
-void Solver::removeAllParticles()
+void Solver::clearScene()
 {
 	particles.getData().clear();
 	constraints.getData().clear();
+	obstacles.getData().clear();
+	grid.clearGrid();
 }
 
-bool Solver::IsBallReachDestination(const std::pair<int, int> ballIndexRange, const sf::Vector2f& destinationPos) {
+bool Solver::IsBallReachDestination(const std::pair<int, int>& ballIndexRange, const sf::Vector2f& destinationPos) {
 
 	for (int i = ballIndexRange.first; i <= ballIndexRange.second; i++) {
 		sf::Vector2f direction = particles[i].currentPosition - destinationPos;
@@ -424,175 +458,21 @@ bool Solver::IsBallReachDestination(const std::pair<int, int> ballIndexRange, co
 }
 
 
-bool Solver::IsBallCollideObstacle(const std::pair<int, int> ballIndexRange, std::vector<Obstacle> obstacles) {
+bool Solver::IsBallCollideObstacle(const std::pair<int, int>& ballIndexRange) {
 
 	for (int i = ballIndexRange.first; i <= ballIndexRange.second; i++) {
-		for (int j = 0; j < obstacles.size(); j++ ) {
-			for (int k = obstacles[j].particleIndexRange.first; k < obstacles[j].particleIndexRange.second ; k++) {
-				sf::Vector2f direction = particles[i].currentPosition - particles[k].currentPosition ;
+		for (int j = 0; j < obstacles.size(); j++) {
+			for (int k = obstacles[j].particleIndexRange.first; k < obstacles[j].particleIndexRange.second; k++) {
+				sf::Vector2f direction = particles[i].currentPosition - particles[k].currentPosition;
 				float distance = Math::getLength(direction);
 				if (distance < 10.0f) {
 					return true;
 				}
 			}
-			
-		} // for
 
+		}
 	}
 	return false;
-}
-
-void Solver::updateObstacle(int moveHorizontal, int& isForwrd, std::pair<int, int> particleRange, std::pair<int, int> horizontalRange, std::pair<int, int> verticalRange, float movingSpeed, sf::Time dt)
-{
-	int minIndex, maxIndex;
-	int minPos, maxPos;
-
-	int startIndex = particleRange.first, endIndex = particleRange.second;
-	if (moveHorizontal) {
-		// std::cout << "start : " << startIndex << " end : " << endIndex << std::endl;
-		minIndex = startIndex, maxIndex = startIndex;
-		minPos = particles[startIndex].currentPosition.x, maxPos = particles[startIndex].currentPosition.x;
-
-		for (int i = startIndex + 1; i <= endIndex; i++) {
-
-			if (particles[i].currentPosition.x < minPos) {
-				minIndex = i;
-				minPos = particles[i].currentPosition.x;
-			} // if
-			else if (particles[i].currentPosition.x > maxPos) {
-				maxIndex = i;
-				maxPos = particles[i].currentPosition.x;
-			} // if
-
-		}
-
-		// std::cout << "minIndex : " << minIndex << "  " << minPos << " ,maxIndex : " << maxIndex << "  " << maxPos << std::endl;
-	}
-	else {
-		minIndex = startIndex, maxIndex = startIndex;
-		minPos = particles[startIndex].currentPosition.y, maxPos = particles[startIndex].currentPosition.y;
-
-		for (int i = startIndex + 1; i <= endIndex; i++) {
-
-			if (particles[i].currentPosition.x < minPos) {
-				minIndex = i;
-				minPos = particles[i].currentPosition.y;
-			} // if
-			if (particles[i].currentPosition.x > maxPos) {
-				maxIndex = i;
-				maxPos = particles[i].currentPosition.y;
-			} // if
-
-		}
-
-	}
-
-
-	// float speed = 100.0f; // Speed in units per second
-	if (isForwrd && (moveHorizontal && maxPos >= horizontalRange.second) || (!moveHorizontal && maxPos >= verticalRange.second)) {
-		isForwrd = 0;
-	}
-	else if (!isForwrd && (moveHorizontal && minPos <= horizontalRange.first) || (!moveHorizontal && minPos <= verticalRange.first)) {
-		isForwrd = 1;
-	}
-
-	if (isForwrd && moveHorizontal) {
-		for (int i = startIndex; i <= endIndex; i++) {
-			particles[i].currentPosition.x += dt.asSeconds() * movingSpeed;
-		}
-	}
-	else if (isForwrd && !moveHorizontal) {
-		for (int i = startIndex; i <= endIndex; i++) {
-			particles[i].currentPosition.y += dt.asSeconds() * movingSpeed;
-		}
-	}
-	else if (!isForwrd && moveHorizontal) {
-		for (int i = startIndex; i <= endIndex; i++) {
-			particles[i].currentPosition.x -= dt.asSeconds() * movingSpeed;
-		}
-	}
-	else if (!isForwrd && !moveHorizontal) {
-		for (int i = startIndex; i <= endIndex; i++) {
-			particles[i].currentPosition.y -= dt.asSeconds() * movingSpeed;
-		}
-	}
-
-}
-
-void Solver::updateObstacle2(Obstacle& obstacle, sf::Time dt)
-{
-	int minIndex, maxIndex;
-	int minPos, maxPos;
-
-	int startIndex = obstacle.particleIndexRange.first, endIndex = obstacle.particleIndexRange.second;
-	if (obstacle.moveHorizontal) {
-		// std::cout << "start : " << startIndex << " end : " << endIndex << std::endl;
-		minIndex = startIndex, maxIndex = startIndex;
-		minPos = particles[startIndex].currentPosition.x, maxPos = particles[startIndex].currentPosition.x;
-
-		for (int i = startIndex + 1; i <= endIndex; i++) {
-
-			if (particles[i].currentPosition.x < minPos) {
-				minIndex = i;
-				minPos = particles[i].currentPosition.x;
-			} // if
-			else if (particles[i].currentPosition.x > maxPos) {
-				maxIndex = i;
-				maxPos = particles[i].currentPosition.x;
-			} // if
-
-		}
-
-		// std::cout << "minIndex : " << minIndex << "  " << minPos << " ,maxIndex : " << maxIndex << "  " << maxPos << std::endl;
-	}
-	else {
-		minIndex = startIndex, maxIndex = startIndex;
-		minPos = particles[startIndex].currentPosition.y, maxPos = particles[startIndex].currentPosition.y;
-
-		for (int i = startIndex + 1; i <= endIndex; i++) {
-
-			if (particles[i].currentPosition.x < minPos) {
-				minIndex = i;
-				minPos = particles[i].currentPosition.y;
-			} // if
-			if (particles[i].currentPosition.x > maxPos) {
-				maxIndex = i;
-				maxPos = particles[i].currentPosition.y;
-			} // if
-
-		}
-
-	}
-
-
-	// float speed = 100.0f; // Speed in units per second
-	if (obstacle.isForward && (obstacle.moveHorizontal && maxPos >= obstacle.horizontalBound.second) || (!obstacle.moveHorizontal && maxPos >= obstacle.verticalBound.second)) {
-		obstacle.isForward = 0;
-	}
-	else if (!obstacle.isForward && (obstacle.moveHorizontal && minPos <= obstacle.horizontalBound.first) || (!obstacle.moveHorizontal && minPos <= obstacle.verticalBound.first)) {
-		obstacle.isForward = 1;
-	}
-
-	if (obstacle.isForward && obstacle.moveHorizontal) {
-		for (int i = startIndex; i <= endIndex; i++) {
-			particles[i].currentPosition.x += dt.asSeconds() * obstacle.movingSpeed;
-		}
-	}
-	else if (obstacle.isForward && !obstacle.moveHorizontal) {
-		for (int i = startIndex; i <= endIndex; i++) {
-			particles[i].currentPosition.y += dt.asSeconds() * obstacle.movingSpeed;
-		}
-	}
-	else if (!obstacle.isForward && obstacle.moveHorizontal) {
-		for (int i = startIndex; i <= endIndex; i++) {
-			particles[i].currentPosition.x -= dt.asSeconds() * obstacle.movingSpeed;
-		}
-	}
-	else if (!obstacle.isForward && !obstacle.moveHorizontal) {
-		for (int i = startIndex; i <= endIndex; i++) {
-			particles[i].currentPosition.y -= dt.asSeconds() * obstacle.movingSpeed;
-		}
-	}
 }
 
 bool Solver::isValidPosition(const sf::Vector2f& position)
@@ -819,6 +699,56 @@ void Solver::solveParticleCollision(Particle* p1, Particle* p2)
 		float delta = responseCoef * 0.5f * (minDistance - distance);
 		p1->move(unit * delta);
 		p2->move(-unit * delta);
+	}
+}
+
+void Solver::solveObstacleCollision(Obstacle& obstacle)
+{
+	int minIndex, maxIndex;
+	float minPos, maxPos;
+
+	int startIndex = obstacle.particleIndexRange.first, endIndex = obstacle.particleIndexRange.second;
+	if (obstacle.moveHorizontal) {
+		minIndex = startIndex, maxIndex = startIndex;
+		minPos = particles[startIndex].currentPosition.x, maxPos = particles[startIndex].currentPosition.x;
+
+		for (int i = startIndex + 1; i <= endIndex; i++) {
+
+			if (particles[i].currentPosition.x < minPos) {
+				minIndex = i;
+				minPos = particles[i].currentPosition.x;
+			}
+			else if (particles[i].currentPosition.x > maxPos) {
+				maxIndex = i;
+				maxPos = particles[i].currentPosition.x;
+			}
+		}
+	}
+	else {
+		minIndex = startIndex, maxIndex = startIndex;
+		minPos = particles[startIndex].currentPosition.y, maxPos = particles[startIndex].currentPosition.y;
+
+		for (int i = startIndex + 1; i <= endIndex; i++) {
+
+			if (particles[i].currentPosition.y < minPos) {
+				minIndex = i;
+				minPos = particles[i].currentPosition.y;
+			}
+			if (particles[i].currentPosition.y > maxPos) {
+				maxIndex = i;
+				maxPos = particles[i].currentPosition.y;
+			}
+		}
+	}
+
+	// float speed = 100.0f; // Speed in units per second
+	if (obstacle.direction == 1 && (obstacle.moveHorizontal && maxPos >= obstacle.horizontalBound.second)
+		|| (!obstacle.moveHorizontal && maxPos >= obstacle.verticalBound.second)) {
+		obstacle.direction = -1;
+	}
+	else if (obstacle.direction == -1 && (obstacle.moveHorizontal && minPos <= obstacle.horizontalBound.first)
+		|| (!obstacle.moveHorizontal && minPos <= obstacle.verticalBound.first)) {
+		obstacle.direction = 1;
 	}
 }
 

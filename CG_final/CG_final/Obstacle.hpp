@@ -4,16 +4,16 @@
 
 struct Obstacle
 {
-	bool isForward = true, moveHorizontal = true;
+	int direction = 1;
+	bool moveHorizontal = true;
 	std::pair<int, int> particleIndexRange;
-	std::pair<int, int> horizontalBound;
-	std::pair<int, int> verticalBound;
-
-	float movingSpeed = 100.0f;
+	std::pair<float, float> horizontalBound;
+	std::pair<float, float> verticalBound;
+	float movingSpeed = 1000.0f;
 
 	Obstacle() = default;
-	Obstacle(bool isForward, bool moveHorizontal, std::pair<int, int> particleIndexRange,
-		std::pair<int, int> horizontalBound, std::pair<int, int> verticalBound, float movingSpeed)
-		:isForward(isForward), moveHorizontal(moveHorizontal), particleIndexRange(particleIndexRange),
+	Obstacle(int direction, bool moveHorizontal, std::pair<int, int> particleIndexRange,
+		std::pair<float, float> horizontalBound, std::pair<float, float> verticalBound, float movingSpeed)
+		:direction(direction), moveHorizontal(moveHorizontal), particleIndexRange(particleIndexRange),
 		horizontalBound(horizontalBound), verticalBound(verticalBound), movingSpeed(movingSpeed) {}
 };

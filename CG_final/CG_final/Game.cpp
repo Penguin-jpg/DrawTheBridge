@@ -142,7 +142,7 @@ void Game::addAdditionalEvents()
 		useForce = false;
 		});
 	eventManager.addMousePressedCallback(sf::Mouse::Middle, [&](const sf::Event& event) {
-		buildMode = (buildMode + 1) % 3;
+		buildMode = (buildMode + 1) % 2;
 		});
 	eventManager.addKeyPressedCallback(sf::Keyboard::C, [&](const sf::Event& event) {
 		chaining = !chaining;
@@ -214,8 +214,7 @@ bool Game::isInLevelGameState() {
 
 
 void Game::clearLevelGameScene() {
-	solver.removeAllParticles();
-	obstacles.clear();
+	solver.clearScene();
 	ballReachDestination = false;
 	isGameOver = false;
 }
@@ -246,10 +245,10 @@ void Game::createLevelTwoScene() {
 
 	sf::Vector2f circlePos = { 220.0f, 70.0f };
 	std::pair<int, int> particleIndexRange = solver.addCircle(circlePos, 30, 20, ParticleColor::Deg15);
-	addObstacle(true, true, particleIndexRange, std::pair(145, 450), std::pair(0, 0), 150.0f);
+	solver.addObstacle(1, true, particleIndexRange, std::pair(145.0f, 450.0f), std::pair(0.0f, 0.0f), 100.0f);
 	circlePos = { 380.0f, 170.0f };
 	particleIndexRange = solver.addCircle(circlePos, 30, 20, ParticleColor::Deg15);
-	addObstacle(false, true, particleIndexRange, std::pair(145, 450), std::pair(0, 0), 150.0f);
+	solver.addObstacle(-1, true, particleIndexRange, std::pair(145.0f, 450.0f), std::pair(0.0f, 0.0f), 100.0f);
 
 	destinationPos = { 432.0f, 261.226f };
 	ballPos = { 121.5f, 70.3f };
@@ -257,12 +256,6 @@ void Game::createLevelTwoScene() {
 	ballIndex = solver.addCircle(ballPos, 10.0f, 6, ballInitVelocity);
 	// std::cout << "ballIndex : " << ballIndex.first << " " << ballIndex.second << std::endl;
 
-}
-
-void Game::addObstacle(bool isForward, bool moveHorizontal, const std::pair<int, int>& particleIndexRange,
-	const std::pair<int, int>& horizontalBound, const std::pair<int, int>& verticalBound, float movingSpeed)
-{
-	obstacles.emplace_back(isForward, moveHorizontal, particleIndexRange, horizontalBound, verticalBound, movingSpeed);
 }
 
 void Game::createLevelThreeScene() {
@@ -290,19 +283,20 @@ void Game::createLevelThreeScene() {
 
 
 
-	recPos = { 150, 100 };
+	recPos = { 150.0f, 100.0f };
 	std::pair<int, int> particleIndexRange = solver.addRectangle(recPos, true, 5, 2, 5.0f, ParticleColor::Deg15);
-	addObstacle(false, false, particleIndexRange, std::pair(0, 0), std::pair(30, 100), 90.0f);
+	solver.addObstacle(-1, false, particleIndexRange, std::pair(0.0f, 0.0f), std::pair(10.0f, 100.0f), 90.0f);
 
 
-	recPos = { 150, 100 };
+	recPos = { 150.0f, 100.0f };
 	particleIndexRange = solver.addRectangle(recPos, true, 5, 2, 5.0f, ParticleColor::Deg15);
-	addObstacle(true, false, particleIndexRange, std::pair(0, 0), std::pair(100, 170), 90.0f);
+	//solver.addObstacle(1, false, particleIndexRange, std::pair(0.0f, 0.0f), std::pair(100.0f, 170.0f), 90.0f);
+	solver.addObstacle(1, false, particleIndexRange, std::pair(0.0f, 0.0f), std::pair(100.0f, 190.0f), 90.0f);
 	//addObstacle(particleIndexRange, 1, 0, std::pair(0, 0), std::pair(30, 120), 90.0f);
 
 	destinationPos = { 72.54f, 119.43f };
 	ballPos = { 368.585f, 148.019f };
-	ballInitVelocity = { -1.0, -0.3 };
+	ballInitVelocity = { -1.0f, -0.3f };
 	ballIndex = solver.addCircle(ballPos, 10.0f, 6, ballInitVelocity);
 
 	/*
@@ -327,7 +321,6 @@ void Game::createLevelThreeScene() {
 
 void Game::run() {
 	sf::Clock spawnTimer;
-	sf::Clock clock;
 
 	//sf::Font font;
 	//if (!font.loadFromFile("assets/Font/Arial.ttf")) {
@@ -347,7 +340,6 @@ void Game::run() {
 	{
 
 		handleEvents();
-		sf::Time dt = clock.restart();
 
 
 		const sf::Vector2f worldMousePosition = getWorldMousePosition();
@@ -410,13 +402,13 @@ void Game::run() {
 				spawnTimer.restart();
 				solver.addCube(worldMousePosition, 1.0f, pinned);
 			}
-			else if (buildMode == 2 && spawnTimer.getElapsedTime().asSeconds() >= CIRCLE_SPAWN_TIME)
+			/*else if (buildMode == 2 && spawnTimer.getElapsedTime().asSeconds() >= CIRCLE_SPAWN_TIME)
 			{
 				spawnTimer.restart();
 				std::cout << "mousePosition : " << worldMousePosition.x << " " << worldMousePosition.y << std::endl;
-				sf::Vector2f initVelocity = { -1.0, 0.3 };
+				sf::Vector2f initVelocity = { -1.0f, 0.3f };
 				solver.addCircle(worldMousePosition, 10.0f, 6, initVelocity);
-			}
+			}*/
 
 		}
 
@@ -455,12 +447,11 @@ void Game::run() {
 
 		if (currentStateID == StateID::Level2 || currentStateID == StateID::Level3) {
 
-			for (int i = 0; i < obstacles.size(); i++) {
-				//solver.updateObstacle(obstacles[i].moveHorizontal, obstacles[i].isForward, obstacles[i].particleIndexRange, obstacles[i].horizontalBound, obstacles[i].verticalBound, obstacles[i].movingSpeed, dt);
-				solver.updateObstacle2(obstacles[i], dt);
-			}
+			/*for (int i = 0; i < obstacles.size(); i++) {
+				solver.updateObstacle(obstacles[i], solver.getStepDt());
+			}*/
 
-			if (solver.IsBallCollideObstacle(ballIndex, obstacles) && !isGameOver) {
+			if (solver.IsBallCollideObstacle(ballIndex) && !isGameOver) {
 				isGameOver = true;
 			}
 		}

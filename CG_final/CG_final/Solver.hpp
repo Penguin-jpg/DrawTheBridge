@@ -19,6 +19,7 @@ public:
 	void applyGravity();
 	void updateParticles(float dt);
 	void updateConstraints(float dt);
+	void updateObstacles(float dt);
 
 	// creation and getters
 	civ::Ref<Particle> addParticle(const sf::Vector2f& position, bool pinned = false);
@@ -32,6 +33,10 @@ public:
 	civ::Ref<Wind> addWind(const sf::Vector2f& position, const sf::Vector2f& size, float speed, float strength);
 	const civ::IndexVector<Wind>& getWinds();
 
+	civ::Ref<Obstacle> addObstacle(int direction, bool moveHorizontal, const std::pair<int, int>& particleIndexRange,
+		const std::pair<float, float>& horizontalBound, const std::pair<float, float>& verticalBound, float movingSpeed);
+	const civ::IndexVector<Obstacle>& getObstacles();
+
 	const sf::Vector3f getWorld();
 	CollisionGrid& getGrid();
 
@@ -41,6 +46,7 @@ public:
 	void solveGridCollision();
 	void solveCellCollision(CollisionCell& cell1, CollisionCell& cell2);
 	void solveParticleCollision(Particle* p1, Particle* p2);
+	void solveObstacleCollision(Obstacle& obstacle);
 	void solveCollisionWithWorld(Particle& particle);
 
 	// additional physics effect functions
@@ -64,24 +70,23 @@ public:
 	std::pair<int, int> addCircle(const sf::Vector2f& poisition, float radius, int numParticles, sf::Vector2f initVelocity, float stiffness = 1.0f, bool pinCenter = false, bool pinOuter = false);
 
 	std::pair<int, int> addCircle(const sf::Vector2f& position, float radius, int numParticles, ParticleColor color);
-	void updateObstacle(int moveHorizontal, int& isForwrd, std::pair<int, int> particleRange, std::pair<int, int> horizontalRange, std::pair<int, int> verticalRange, float movingSpeed, sf::Time dt);
-	void updateObstacle2(Obstacle& obstacle, sf::Time dt);
 
-	bool IsBallReachDestination(const std::pair<int, int> ballIndexRange, const sf::Vector2f& destinationPos);
-	bool IsBallCollideObstacle(const std::pair<int, int> ballIndexRange, std::vector<Obstacle> obstacleIndexRange);
+	bool IsBallReachDestination(const std::pair<int, int>& ballIndexRange, const sf::Vector2f& destinationPos);
+	bool IsBallCollideObstacle(const std::pair<int, int>& ballIndexRange);
 	// timing functions
 	const float getElapsedTime();
 	void setFrameDt(const int framerate);
 	void setSubSteps(const int subSteps);
 	const float getStepDt();
 
-	void removeAllParticles();
+	void clearScene();
 
 private:
 	sf::Vector2f gravity{ 0.0f, 1000.0f };
 	civ::IndexVector<Particle> particles;
 	civ::IndexVector<Constraint> constraints;
 	civ::IndexVector<Wind> winds;
+	civ::IndexVector<Obstacle> obstacles;
 	// world box
 	sf::Vector2f worldSize;
 	float particleRadius = 1.0f;
