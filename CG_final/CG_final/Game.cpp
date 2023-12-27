@@ -321,24 +321,26 @@ void Game::createLevelThreeScene() {
 
 void Game::run() {
 	sf::Clock spawnTimer;
+	sf::Clock clock;
+	
+	// window.setFramerateLimit(FRAMERATE);
 
-	//sf::Font font;
-	//if (!font.loadFromFile("assets/Font/Arial.ttf")) {
-	//	// return -1; // handle error
-	//}
+	sf::Font font;
+	if (!font.loadFromFile("assets/Font/Arial.ttf")) {
+		std::cout << "cannnot load assets/Font/Arial.ttf" << std::endl;
+	}
 
-	//sf::Text text;
-	//text.setFont(font);
-	//text.setString("");
-	//text.setCharacterSize(24);
-	//text.setFillColor(sf::Color::Red);
-	//text.setPosition(100, 300); // Adjust as needed
+	sf::Text text;
+	text.setFont(font);
+	text.setString("");
+	text.setCharacterSize(32);
+	text.setFillColor(sf::Color::White);
+	text.setPosition(90, 140); // Adjust as needed
 
 
 
 	while (isRunning())
 	{
-
 		handleEvents();
 
 
@@ -346,6 +348,7 @@ void Game::run() {
 		const sf::Vector2f screenMousePosition = getScreenMousePosition();
 		const sf::Vector2f gridCoord = (sf::Vector2f)solver.getGrid().getGridCoordinate(worldMousePosition, OBJECT_RADIUS);
 		sf::Vector2f objectPosition(gridCoord.y * CELL_SIZE + OBJECT_RADIUS, gridCoord.x * CELL_SIZE + OBJECT_RADIUS);
+
 
 
 
@@ -461,12 +464,20 @@ void Game::run() {
 			ballReachDestination = solver.IsBallReachDestination(ballIndex, destinationPos);
 		}
 
+		float deltaTime = clock.restart().asSeconds();
+		float fps = 1.0f / (deltaTime);
+		text.setString("FPS: " + std::to_string(static_cast<int>(fps)));
+
+
 		clear();
+
+
 
 		currentGameState->render(window);
 
 		if (isInLevelGameState()) {
 			renderer.render(context, getWorldMousePosition(), buildMode, showGrid);
+			window.draw(text);
 
 		}
 		if (isGameOver) {
@@ -475,7 +486,8 @@ void Game::run() {
 		else if (ballReachDestination) {
 			currentGameState->renderWinWindow(window);
 		}
-
+		
+		
 		display();
 
 	}
