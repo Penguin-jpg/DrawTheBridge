@@ -1,8 +1,9 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <iostream>
-#include "Item.hpp"
 #include <vector>
+#include "Item.hpp"
+#include "RenderContext.hpp"
 
 enum class StateID {
 	StartMenu,
@@ -17,10 +18,10 @@ enum class StateID {
 class GameState {
 public:
 	std::vector<StateID> levelStates = { StateID::Level1, StateID::Level2, StateID::Level3 };
-	virtual bool handleInput(sf::RenderWindow& window, const sf::Vector2f& mousePos, StateID& currentStateID, bool isWin, bool isLose) = 0;
+	virtual bool handleInput(const sf::Vector2f& mousePos, StateID& currentStateID, bool isWin, bool isLose) = 0;
 	virtual void update(float dt) = 0;
-	virtual void render(sf::RenderWindow& window) = 0;
-	virtual void btnIsHovered(sf::RenderWindow& window, const sf::Vector2f& mousePos) = 0;
+	virtual void render(RenderContext& context) = 0;
+	virtual void btnIsHovered(const sf::Vector2f& mousePos) = 0;
 	virtual void flgIsPressed(bool chaining, bool pinned, bool showGrid, bool useWind, bool grabbing, bool pause) = 0;
 	virtual void btnSetColor(Item& item, const sf::Vector2f& mousePos) {
 		if (item.mSprite.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
@@ -41,13 +42,9 @@ public:
 		}
 	}
 
-	virtual void renderWinWindow(sf::RenderWindow& window) {
+	virtual void renderWinWindow(RenderContext& context) {}
+	virtual void renderLoseWindow(RenderContext& context) {}
 
-	}
-
-	virtual void renderLoseWindow(sf::RenderWindow& window) {
-
-	}
 	virtual ~GameState() {}
 
 };
@@ -62,10 +59,10 @@ public:
 	StartMenuState();
 	StartMenuState(sf::RenderWindow& window);
 
-	bool handleInput(sf::RenderWindow& window, const sf::Vector2f& mousePos, StateID& currentStateID, bool isWin, bool isLose) override;
-	void btnIsHovered(sf::RenderWindow& window, const sf::Vector2f& mousePos) override;
+	bool handleInput(const sf::Vector2f& mousePos, StateID& currentStateID, bool isWin, bool isLose) override;
+	void btnIsHovered(const sf::Vector2f& mousePos) override;
 	void update(float dt) override;
-	void render(sf::RenderWindow& window) override;
+	void render(RenderContext& context) override;
 	void flgIsPressed(bool chaining, bool pinned, bool showGrid, bool useWind, bool grabbing, bool pause) {
 
 	}
@@ -87,12 +84,10 @@ public:
 	LevelSelectionState();
 
 	LevelSelectionState(sf::RenderWindow& window);
-
-	bool handleInput(sf::RenderWindow& window, const sf::Vector2f& mousePos, StateID& currentStateID, bool isWin, bool isLose) override;
-
-	void btnIsHovered(sf::RenderWindow& window, const sf::Vector2f& mousePos) override;
+	bool handleInput(const sf::Vector2f& mousePos, StateID& currentStateID, bool isWin, bool isLose) override;
+	void btnIsHovered(const sf::Vector2f& mousePos) override;
 	void update(float dt) override;
-	void render(sf::RenderWindow& window) override;
+	void render(RenderContext& context) override;
 	void flgIsPressed(bool chaining, bool pinned, bool showGrid, bool useWind, bool grabbing, bool pause) {
 
 	}
@@ -132,14 +127,14 @@ public:
 
 	LevelGameState(sf::RenderWindow& window);
 
-	bool handleInput(sf::RenderWindow& window, const sf::Vector2f& mousePos, StateID& currentStateID, bool isWin, bool isLose) override;
+	bool handleInput(const sf::Vector2f& mousePos, StateID& currentStateID, bool isWin, bool isLose) override;
 
-	void btnIsHovered(sf::RenderWindow& window, const sf::Vector2f& mousePos) override;
+	void btnIsHovered(const sf::Vector2f& mousePos) override;
 	void flgIsPressed(bool chaining, bool pinned, bool showGrid, bool useWind, bool grabbing, bool pause) override;
 	void update(float dt) override;
-	void render(sf::RenderWindow& window) override;
-	void renderWinWindow(sf::RenderWindow& window) override;
-	void renderLoseWindow(sf::RenderWindow& window) override;
+	void render(RenderContext& context) override;
+	void renderWinWindow(RenderContext& context) override;
+	void renderLoseWindow(RenderContext& context) override;
 
 };
 
@@ -151,7 +146,7 @@ public:
 
 	Level1(sf::RenderWindow& window);
 
-	//void render(sf::RenderWindow& window) override;
+	//void render(RenderContext& context) override;
 };
 
 class Level2 : public LevelGameState {
@@ -162,10 +157,7 @@ public:
 
 
 	Level2() = default;
-
 	Level2(sf::RenderWindow& window);
-
-	//void render(sf::RenderWindow& window) override;
 };
 
 class Level3 : public LevelGameState {
@@ -173,8 +165,5 @@ class Level3 : public LevelGameState {
 public:
 
 	Level3() = default;
-
 	Level3(sf::RenderWindow& window);
-
-	// void render(sf::RenderWindow& window) override;
 };

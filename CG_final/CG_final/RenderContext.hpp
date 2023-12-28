@@ -13,10 +13,11 @@ struct RenderContext
 	RenderContext(sf::RenderWindow& window)
 		:window(window), stateManager((sf::Vector2f)window.getSize()) {}
 
-	void draw(sf::Drawable& drawable, sf::RenderStates states)
+	void draw(sf::Drawable& drawable, sf::RenderStates states = {}, bool useTransform = true)
 	{
 		// apply transform
-		states.transform = stateManager.getTransform();
+		if (useTransform)
+			states.transform = stateManager.getTransform();
 		window.draw(drawable, states);
 	}
 

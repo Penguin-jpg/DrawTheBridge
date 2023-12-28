@@ -322,7 +322,7 @@ void Game::createLevelThreeScene() {
 void Game::run() {
 	sf::Clock spawnTimer;
 	sf::Clock clock;
-	
+
 	// window.setFramerateLimit(FRAMERATE);
 
 	sf::Font font;
@@ -330,12 +330,12 @@ void Game::run() {
 		std::cout << "cannnot load assets/Font/Arial.ttf" << std::endl;
 	}
 
-	sf::Text text;
-	text.setFont(font);
-	text.setString("");
-	text.setCharacterSize(32);
-	text.setFillColor(sf::Color::White);
-	text.setPosition(90, 140); // Adjust as needed
+	sf::Text fpsText("", font, 32);
+	sf::Text numberText("", font, 32);
+	fpsText.setFillColor(sf::Color::White);
+	fpsText.setPosition(90, 140); // Adjust as needed
+	numberText.setFillColor(sf::Color::White);
+	numberText.setPosition(90, 200);
 
 
 
@@ -355,7 +355,7 @@ void Game::run() {
 		if (isMouseLeftPressAndReleased) {
 			isMouseLeftPressAndReleased = false;
 			StateID preStateID = currentStateID;
-			currentGameState->handleInput(window, screenMousePosition, currentStateID, ballReachDestination, isGameOver);
+			currentGameState->handleInput(screenMousePosition, currentStateID, ballReachDestination, isGameOver);
 
 
 			if (currentStateID == StateID::LevelGamePlay) {
@@ -430,7 +430,7 @@ void Game::run() {
 			}
 		}
 
-		currentGameState->btnIsHovered(window, screenMousePosition);
+		currentGameState->btnIsHovered(screenMousePosition);
 		currentGameState->flgIsPressed(chaining, pinned, showGrid, useWind, grabbing, pause);
 
 
@@ -464,32 +464,31 @@ void Game::run() {
 			ballReachDestination = solver.IsBallReachDestination(ballIndex, destinationPos);
 		}
 
-		float deltaTime = clock.restart().asSeconds();
-		float fps = 1.0f / (deltaTime);
-		text.setString("FPS: " + std::to_string(static_cast<int>(fps)));
-
-
 		clear();
 
-
-
-		currentGameState->render(window);
+		currentGameState->render(context);
 
 		if (isInLevelGameState()) {
 			renderer.render(context, getWorldMousePosition(), buildMode, showGrid);
-			window.draw(text);
-
+			context.draw(fpsText, {}, false);
+			context.draw(numberText, {}, false);
 		}
 		if (isGameOver) {
-			currentGameState->renderLoseWindow(window);
+			currentGameState->renderLoseWindow(context);
 		}
 		else if (ballReachDestination) {
-			currentGameState->renderWinWindow(window);
+			currentGameState->renderWinWindow(context);
 		}
-		
-		
+
+
 		display();
 
+
+		float deltaTime = clock.getElapsedTime().asSeconds();
+		float fps = 1.0f / deltaTime;
+		fpsText.setString("FPS: " + std::to_string(int(fps)));
+		numberText.setString("Objects: " + std::to_string(solver.getNumParticles()));
+		clock.restart();
 	}
 
 }

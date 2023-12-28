@@ -15,7 +15,7 @@ StartMenuState::StartMenuState(sf::RenderWindow& window) : startButton("assets/U
 	background.setScale(true, window, 1.0f, 1.0f);
 }
 
-bool StartMenuState::handleInput(sf::RenderWindow& window, const sf::Vector2f& mousePos, StateID& currentStateID, bool isWin, bool isLose) {
+bool StartMenuState::handleInput(const sf::Vector2f& mousePos, StateID& currentStateID, bool isWin, bool isLose) {
 	if (startButton.mSprite.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
 		std::cout << "Start" << std::endl;
 		currentStateID = StateID::LevelSelection;
@@ -26,7 +26,7 @@ bool StartMenuState::handleInput(sf::RenderWindow& window, const sf::Vector2f& m
 }
 
 
-void StartMenuState::btnIsHovered(sf::RenderWindow& window, const sf::Vector2f& mousePos)
+void StartMenuState::btnIsHovered(const sf::Vector2f& mousePos)
 {
 	btnSetColor(startButton, mousePos);
 }
@@ -36,13 +36,12 @@ void StartMenuState::update(float dt) {
 	// Update animations or other elements
 }
 
-void StartMenuState::render(sf::RenderWindow& window) {
-
-	window.draw(background.mSprite);
-	window.draw(logo.mSprite);
-	// window.draw(startButton);
+void StartMenuState::render(RenderContext& context) {
+	context.draw(background.mSprite, {}, false);
+	context.draw(logo.mSprite, {}, false);
+	// context.draw(startButton);
 	// Render other UI components if any
-	window.draw(startButton.mSprite);
+	context.draw(startButton.mSprite, {}, false);
 
 }
 
@@ -67,7 +66,7 @@ LevelSelectionState::LevelSelectionState(sf::RenderWindow& window) : levelButton
 	background.setScale(true, window, 1.0f, 1.0f);
 }
 
-bool LevelSelectionState::handleInput(sf::RenderWindow& window, const sf::Vector2f& mousePos, StateID& currentStateID, bool isWin, bool isLose) {
+bool LevelSelectionState::handleInput(const sf::Vector2f& mousePos, StateID& currentStateID, bool isWin, bool isLose) {
 	for (int i = 0; i < NUM_LEVELS; ++i) {
 		if (levelButton[i].mSprite.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
 			std::cout << "Level " << i + 1 << " pressed" << std::endl;
@@ -83,9 +82,8 @@ bool LevelSelectionState::handleInput(sf::RenderWindow& window, const sf::Vector
 	return false;
 }
 
-void LevelSelectionState::btnIsHovered(sf::RenderWindow& window, const sf::Vector2f& mousePos)
+void LevelSelectionState::btnIsHovered(const sf::Vector2f& mousePos)
 {
-
 	btnSetColor(backBtn, mousePos);
 	for (auto& levelBtn : levelButton) {
 		btnSetColor(levelBtn, mousePos);
@@ -98,13 +96,13 @@ void LevelSelectionState::update(float dt) {
 	// Update animations or other elements
 }
 
-void LevelSelectionState::render(sf::RenderWindow& window) {
+void LevelSelectionState::render(RenderContext& context) {
 
-	window.draw(background.mSprite);
-	window.draw(backBtn.mSprite);
-	window.draw(titleBtn.mSprite);
-	for (const auto& levelBtn : levelButton) {
-		window.draw(levelBtn.mSprite);
+	context.draw(background.mSprite, {}, false);
+	context.draw(backBtn.mSprite, {}, false);
+	context.draw(titleBtn.mSprite, {}, false);
+	for (auto& levelBtn : levelButton) {
+		context.draw(levelBtn.mSprite, {}, false);
 	}
 
 }
@@ -149,7 +147,7 @@ LevelGameState::LevelGameState(sf::RenderWindow& window) :background("assets/UI/
 	game_over_list.setPosition(965, 650);
 }
 
-bool LevelGameState::handleInput(sf::RenderWindow& window, const sf::Vector2f& mousePos, StateID& currentStateID, bool isWin, bool isLose) {
+bool LevelGameState::handleInput(const sf::Vector2f& mousePos, StateID& currentStateID, bool isWin, bool isLose) {
 
 	if (backBtn.mSprite.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
 		currentStateID = StateID::LevelSelection;
@@ -197,7 +195,7 @@ bool LevelGameState::handleInput(sf::RenderWindow& window, const sf::Vector2f& m
 	return false;
 }
 
-void LevelGameState::btnIsHovered(sf::RenderWindow& window, const sf::Vector2f& mousePos)
+void LevelGameState::btnIsHovered(const sf::Vector2f& mousePos)
 {
 	btnSetColor(backBtn, mousePos);
 	btnSetColor(refreshBtn, mousePos);
@@ -227,35 +225,35 @@ void LevelGameState::update(float dt) {
 	// Update animations or other elements
 }
 
-void LevelGameState::render(sf::RenderWindow& window) {
+void LevelGameState::render(RenderContext& context) {
 
-	window.draw(background.mSprite);
-	window.draw(backBtn.mSprite);
-	window.draw(refreshBtn.mSprite);
-	window.draw(destinationFlag.mSprite);
-	window.draw(chainingFlg.mSprite);
-	window.draw(pinnedFlg.mSprite);
-	window.draw(showGridFlg.mSprite);
-	window.draw(windFlg.mSprite);
-	window.draw(grabbingFlg.mSprite);
-	window.draw(pauseFlg.mSprite);
-	window.draw(playBtn.mSprite);
+	context.draw(background.mSprite, {}, false);
+	context.draw(backBtn.mSprite, {}, false);
+	context.draw(refreshBtn.mSprite, {}, false);
+	context.draw(destinationFlag.mSprite, {}, false);
+	context.draw(chainingFlg.mSprite, {}, false);
+	context.draw(pinnedFlg.mSprite, {}, false);
+	context.draw(showGridFlg.mSprite, {}, false);
+	context.draw(windFlg.mSprite, {}, false);
+	context.draw(grabbingFlg.mSprite, {}, false);
+	context.draw(pauseFlg.mSprite, {}, false);
+	context.draw(playBtn.mSprite, {}, false);
 
 	// window.draw(pauseBtn.mSprite);
 }
 
-void LevelGameState::renderWinWindow(sf::RenderWindow& window) {
+void LevelGameState::renderWinWindow(RenderContext& context) {
 
-	window.draw(win.mSprite);
-	window.draw(win_reload.mSprite);
-	window.draw(win_continue.mSprite);
+	context.draw(win.mSprite, {}, false);
+	context.draw(win_reload.mSprite, {}, false);
+	context.draw(win_continue.mSprite, {}, false);
 }
 
-void LevelGameState::renderLoseWindow(sf::RenderWindow& window) {
+void LevelGameState::renderLoseWindow(RenderContext& context) {
 
-	window.draw(game_over.mSprite);
-	window.draw(win_reload.mSprite);
-	window.draw(game_over_list.mSprite);
+	context.draw(game_over.mSprite, {}, false);
+	context.draw(win_reload.mSprite, {}, false);
+	context.draw(game_over_list.mSprite, {}, false);
 }
 
 Level1::Level1(sf::RenderWindow& window) : LevelGameState(window) {
