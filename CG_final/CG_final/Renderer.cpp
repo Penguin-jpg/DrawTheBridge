@@ -1,6 +1,6 @@
 #include "Renderer.hpp"
 
-Renderer::Renderer(Solver& solver) : solver(solver), worldBox(sf::Quads, 4), numOfTexture(16), circleTexture(numOfTexture)
+Renderer::Renderer(Solver& solver) : solver(solver), worldBox(sf::Quads, 4), numOfTexture(19), circleTexture(numOfTexture)
 {
 	initWorldBox();
 
@@ -38,6 +38,9 @@ Renderer::Renderer(Solver& solver) : solver(solver), worldBox(sf::Quads, 4), num
 	textureMap[ParticleColor::Deg14] = &circleTexture[13];
 	textureMap[ParticleColor::Deg15] = &circleTexture[14];
 	textureMap[ParticleColor::Deg16] = &circleTexture[15];
+	textureMap[ParticleColor::Deg17] = &circleTexture[16];
+	textureMap[ParticleColor::Deg18] = &circleTexture[17];
+	textureMap[ParticleColor::Deg19] = &circleTexture[18];
 }
 
 void Renderer::initWorldBox()

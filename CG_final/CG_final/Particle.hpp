@@ -19,6 +19,9 @@ enum class ParticleColor {
 	Deg14,
 	Deg15,
 	Deg16,
+	Deg17,
+	Deg18,
+	Deg19,
 };
 
 // basic object

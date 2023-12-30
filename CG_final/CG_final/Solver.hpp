@@ -67,6 +67,10 @@ public:
 	std::pair<int, int> addRectangle(const sf::Vector2f& position, bool pinned, int width, int height, float particleRadius, ParticleColor color);
 	// std::pair<int, int> addCircle(const sf::Vector2f& position, float radius, int numParticles);
 
+	std::pair<int, int> addTriangle(const sf::Vector2f& position, bool pinned, int baseWidth, float specParticleRadius, ParticleColor color);
+
+	std::pair<int, int> addRightTriangle(const sf::Vector2f& position, bool pinned, int height, float specParticleRadius, ParticleColor color);
+
 	std::pair<int, int> addCircle(const sf::Vector2f& poisition, float radius, int numParticles, sf::Vector2f initVelocity, float stiffness = 1.0f, bool pinCenter = false, bool pinOuter = false);
 
 	std::pair<int, int> addCircle(const sf::Vector2f& position, float radius, int numParticles, ParticleColor color);

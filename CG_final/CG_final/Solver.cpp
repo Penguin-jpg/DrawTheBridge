@@ -415,7 +415,52 @@ std::pair<int, int> Solver::addRectangle(const sf::Vector2f& position, bool pinn
 	return std::make_pair(startIndex, endIndex);
 }
 
+std::pair<int, int> Solver::addTriangle(const sf::Vector2f& position, bool pinned, int baseWidth, float specParticleRadius, ParticleColor color) {
 
+	int startIndex = particles.size();
+	float offset = 2 * specParticleRadius;
+	int height = baseWidth / 2;
+
+	for (int i = 0; i <= height; ++i) {
+
+		int particlesInRow = baseWidth - (2 * i);
+		sf::Vector2f rowStartPosition = { position.x - particlesInRow / 2.0f * offset, position.y + i * offset };
+
+
+		for (int j = 0; j < particlesInRow; ++j) {
+
+			float x = rowStartPosition.x + j * offset;
+			float y = rowStartPosition.y;
+
+			civ::Ref<Particle> p = addParticle({ x, y }, pinned);
+			particles[particles.size() - 1].color = color;
+		}
+	}
+	int endIndex = particles.size() - 1;
+	return std::make_pair(startIndex, endIndex);
+}
+
+std::pair<int, int> Solver::addRightTriangle(const sf::Vector2f& position, bool pinned, int height, float specParticleRadius, ParticleColor color) {
+
+	int startIndex = particles.size();
+	float offset = 2 * specParticleRadius;
+
+	for (int i = 0; i < height; ++i) {
+		int particlesInRow = height - i;
+		sf::Vector2f rowStartPosition = { position.x, position.y + i * offset };
+
+		for (int j = 0; j < particlesInRow; ++j) {
+
+			float x = rowStartPosition.x + j * offset;
+			float y = rowStartPosition.y;
+
+			civ::Ref<Particle> p = addParticle({ x, y }, pinned);
+			particles[particles.size() - 1].color = color;
+		}
+	}
+	int endIndex = particles.size() - 1;
+	return std::make_pair(startIndex, endIndex);
+}
 
 std::pair<int, int> Solver::addCircle(const sf::Vector2f& position, float radius, int numParticles, ParticleColor color)
 {

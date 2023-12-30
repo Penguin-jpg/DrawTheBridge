@@ -222,12 +222,23 @@ void Game::clearLevelGameScene() {
 void Game::createLevelOneScene() {
 
 	clearLevelGameScene();
-	sf::Vector2f recPos = { 90,185 };
+	sf::Vector2f recPos = { 85,185 };
 	solver.addRectangle(recPos, true, 13, 23, 5.0f, ParticleColor::Deg14);
 	recPos = { 400, 230 };
 	solver.addRectangle(recPos, true, 10, 14, 5.0f, ParticleColor::Deg14);
+	recPos = { 250, 245 };
+	solver.addRectangle(recPos, true, 20, 11, 5.0f, ParticleColor::Deg19);
+
+	for (int i = 0; i < 10; i++) {
+		
+		recPos = { 155+i*20.0f, 180.0f };
+		solver.addRectangle(recPos, true, 1, 2, 5.0f, ParticleColor::Deg19);
+	}
+
+
+
 	destinationPos = { 408.774, 124.811 };
-	ballPos = { 151.5, 38.3 };
+	ballPos = { 148.5, 38.3 };
 	ballInitVelocity = { 0.0f, 0.0f };
 	ballIndex = solver.addCircle(ballPos, 10.0f, 6, ballInitVelocity);
 }
@@ -235,23 +246,42 @@ void Game::createLevelOneScene() {
 void Game::createLevelTwoScene() {
 
 	clearLevelGameScene();
-	sf::Vector2f recPos = { 65.0f, 100.0f };
-	solver.addRectangle(recPos, true, 12, 3, 5.0f, ParticleColor::Deg14);
-	recPos = { 250.0f, 290.0f };
-	solver.addRectangle(recPos, true, 45, 1, 5.0f, ParticleColor::Deg14);
+	sf::Vector2f recPos = { 65.0f, 95.0f };
+	solver.addRectangle(recPos, true, 13, 3, 5.0f, ParticleColor::Deg14);
 
-	recPos = { 355.0f, 265.0f };
-	solver.addRectangle(recPos, true, 6, 4, 5.0f, ParticleColor::Deg14);
+	recPos = { 250.0f, 295.0f };
+	solver.addRectangle(recPos, true, 50, 1, 5.0f, ParticleColor::Deg14);
 
-	sf::Vector2f circlePos = { 220.0f, 70.0f };
+	recPos = { 365.0f, 265.0f };
+	solver.addRectangle(recPos, true, 7, 5, 5.0f, ParticleColor::Deg14);
+
+	recPos = { 275.0f, 20.0f };
+	solver.addRectangle(recPos, true, 39, 4, 5.0f, ParticleColor::Deg14);
+
+	recPos = { 485.0f, 200.0f };
+	solver.addRectangle(recPos, true, 3, 18, 5.0f, ParticleColor::Deg14);
+
+	for (int i = 0; i < 6; i++) {
+		for (int j = 0; j < 9-i; j++) {
+			recPos = { 5 + j * 30.0f, 265-i*30.0f };
+			solver.addRightTriangle(recPos, true, 3, 5.0f, ParticleColor::Deg18);
+		}
+	}
+	for (int j = 0; j < 2; j++) {
+		recPos = { 275.0f + j * 30.0f, 265.0f };
+		solver.addRightTriangle(recPos, true, 3, 5.0f, ParticleColor::Deg18);
+	}
+
+
+	sf::Vector2f circlePos = { 220.0f, 75.0f };
 	std::pair<int, int> particleIndexRange = solver.addCircle(circlePos, 30, 20, ParticleColor::Deg15);
 	solver.addObstacle(1, true, particleIndexRange, std::pair(145.0f, 450.0f), std::pair(0.0f, 0.0f), 100.0f);
 	circlePos = { 380.0f, 170.0f };
 	particleIndexRange = solver.addCircle(circlePos, 30, 20, ParticleColor::Deg15);
 	solver.addObstacle(-1, true, particleIndexRange, std::pair(145.0f, 450.0f), std::pair(0.0f, 0.0f), 100.0f);
 
-	destinationPos = { 432.0f, 261.226f };
-	ballPos = { 121.5f, 70.3f };
+	destinationPos = { 442.0f, 261.226f };
+	ballPos = { 121.5f, 67.3f };
 	ballInitVelocity = { 0.0f, 0.0f };
 	ballIndex = solver.addCircle(ballPos, 10.0f, 6, ballInitVelocity);
 	// std::cout << "ballIndex : " << ballIndex.first << " " << ballIndex.second << std::endl;
@@ -269,19 +299,38 @@ void Game::createLevelThreeScene() {
 	solver.addRectangle(recPos, true, 12, 3, 5.0f, ParticleColor::Deg14);
 	*/
 
-	recPos = { 380.0f, 225.0f };
+	recPos = { 395.0f, 225.0f };
 	solver.addRectangle(recPos, true, 7, 12, 5.0f, ParticleColor::Deg14);
 
-	recPos = { 230.0f, 180.0f };
-	solver.addRectangle(recPos, true, 8, 18, 5.0f, ParticleColor::Deg14);
+	recPos = { 225.0f, 185.0f };
+	solver.addRectangle(recPos, true, 9, 20, 5.0f, ParticleColor::Deg14);
 
-	recPos = { 90.0f, 160.0f };
-	solver.addRectangle(recPos, true, 8, 3, 5.0f, ParticleColor::Deg14);
+	recPos = { 90.0f, 155.0f };
+	solver.addRectangle(recPos, true, 8, 2, 5.0f, ParticleColor::Deg14);
 
-	recPos = { 250.0f, 290.0f };
-	solver.addRectangle(recPos, true, 45, 1, 5.0f, ParticleColor::Deg14);
+	recPos = { 245.0f, 290.0f };
+	solver.addRectangle(recPos, true, 49, 1, 5.0f, ParticleColor::Deg14);
 
+	for (int i = 0; i < 6; i++) {
+		for (int j = 0; j < 6; j++) {
+			recPos = { 20 + j * 30.0f, 270.0f-i*20.0f };
+			solver.addTriangle(recPos, true, 3, 5.0f, ParticleColor::Deg18);
+		}
+	}
 
+	for (int i = 0; i < 6; i++) {
+		for (int j = 0; j < 3; j++) {
+			recPos = { 290.0f + j * 30.0f, 270.0f - i * 20.0f };
+			solver.addTriangle(recPos, true, 3, 5.0f, ParticleColor::Deg18);
+		}
+	}
+
+	for (int i = 0; i < 6; i++) {
+		for (int j = 0; j < 2; j++) {
+			recPos = { 450.0f + j * 30.0f, 270.0f - i * 20.0f };
+			solver.addTriangle(recPos, true, 3, 5.0f, ParticleColor::Deg18);
+		}
+	}
 
 	recPos = { 150.0f, 100.0f };
 	std::pair<int, int> particleIndexRange = solver.addRectangle(recPos, true, 5, 2, 5.0f, ParticleColor::Deg15);
