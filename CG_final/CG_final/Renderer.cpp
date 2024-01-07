@@ -42,7 +42,7 @@ void Renderer::render(RenderContext& context, const sf::Vector2f& mousePosition,
 	if (showGrid)
 		drawGrid(context, states);
 	// draw object type
-	drawType(context, states, mousePosition, type);
+	//drawType(context, states, mousePosition, type);
 }
 
 void Renderer::drawParticles(RenderContext& context, sf::RenderStates& states)

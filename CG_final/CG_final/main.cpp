@@ -23,8 +23,8 @@ int main()
 	const float CIRCLE_SPAWN_TIME = 0.2f;
 	const float OBJECT_SPPED = 500.0f;
 	const sf::Vector2f WORLD_SIZE = { 500.0f, 300.0f };
-	const sf::Vector2f SPAWN_LOCATION = { OBJECT_RADIUS, OBJECT_RADIUS + 3.0f };
-
+	//const sf::Vector2f SPAWN_LOCATION = { OBJECT_RADIUS, OBJECT_RADIUS + 3.0f };
+	const sf::Vector2f SPAWN_LOCATION = { 250.0f, 5.0f };
 	// control varaibles
 	bool useForce = false; // apply force on objects
 	bool isBuilding = false; // build or not
@@ -36,7 +36,7 @@ int main()
 	bool grabbing = false; // grab clicked object
 	bool pause = false; // pause game or not
 
-	Game game(WINDOW_WIDTH, WINDOW_HEIGHT, "SFML Game", sf::Style::Fullscreen);
+	Game game(WINDOW_WIDTH, WINDOW_HEIGHT, "SFML Game", sf::Style::Default);
 	RenderContext& context = game.getRenderContext();
 
 	// settings
@@ -134,21 +134,34 @@ int main()
 		pause = !pause;
 		});
 
+	civ::Ref<Particle> p1 = solver.addParticle({ 150.0f, 150.0f }, true);
+	civ::Ref<Particle> p2 = solver.addParticle({ 350.0f, 150.0f }, true);
+	solver.addChain(p1, p2);
+
 	while (game.isRunning())
 	{
 		game.handleEvents();
 
-		//if (solver.getNumParticles() < MAX_NUM_OBJECTS
-		//	&& spawnTimer.getElapsedTime().asSeconds() >= PARTICLE_SPAWN_TIME)
-		//{
-		//	spawnTimer.restart();
-		//	civ::Ref<Particle> particle = solver.addParticle(SPAWN_LOCATION);
-		//	const float elapsedTime = solver.getElapsedTime();
-		//	const float angle = sin(elapsedTime) + Math::PI * 0.5f;
-		//	particle->initVelocity(OBJECT_SPPED * sf::Vector2f(1.0f, 0.0f), solver.getStepDt());
-		//	if (chaining)
-		//		chainedParitlces.push_back(particle);
-		//}
+		if (!pause && solver.getNumParticles() < MAX_NUM_OBJECTS
+			&& spawnTimer.getElapsedTime().asSeconds() >= PARTICLE_SPAWN_TIME)
+		{
+			spawnTimer.restart();
+			if (rng.sampleUniform() <= 0.98f)
+			{
+				civ::Ref<Particle> particle = solver.addParticle(SPAWN_LOCATION);
+				const float elapsedTime = solver.getElapsedTime();
+				const float angle = sin(elapsedTime) + Math::PI * 0.5f;
+				/*particle->initVelocity(OBJECT_SPPED * sf::Vector2f(1.0f, 0.0f), solver.getStepDt());*/
+				particle->initVelocity(OBJECT_SPPED * sf::Vector2f(cos(angle), sin(angle)), solver.getStepDt());
+
+			}
+			else
+			{
+				solver.addCube(SPAWN_LOCATION);
+			}
+			/*if (chaining)
+				chainedParitlces.push_back(particle);*/
+		}
 
 		const sf::Vector2f mousePosition = game.getWorldMousePosition();
 		const sf::Vector2f gridCoord = (sf::Vector2f)solver.getGrid().getGridCoordinate(mousePosition, OBJECT_RADIUS);
