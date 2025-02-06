@@ -7,8 +7,10 @@ Particle is the basic unit in this engine, we can use particles to form circle, 
 Since there might be hundreds of particles collide at the same time, we need an efficient way to detect collisions. We choose to use collision grid (or uniform grid). It is easy to implement and very effective. The below images show the differences between using collision grid and not using it.
 
 - Without collision grid
+
     ![Without collision grid](assets/without_collision_grid.gif)
 - With collision grid
+
     ![With collision grid](assets/with_collision_grid.gif)
 
 ## How to Play
